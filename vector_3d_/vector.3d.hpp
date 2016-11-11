@@ -6,6 +6,11 @@
 #ifdef  __VECTOR_3D_LOG
   #include<iostream>// clog, endl
   #include"type.name.str.h"
+  #define __VEC3D_LOG1( source, method ) (source)->log( (method) )
+  #define __VEC3D_LOG2( typeU, source, method ) (source)->log<typeU>( (method) )
+#else
+  #define __VEC3D_LOG1( source, method )
+  #define __VEC3D_LOG2( typeU, source, method )
 #endif
 
 template<typename T>
@@ -28,7 +33,7 @@ template<typename U> __VECTOR_3D__INLINE void vector_3d<T>::log(const char * _me
 	std::clog << "LOG : [" << this << "] template<typename U> vector_3d<T>::" << _method <<
   #ifdef  __TYPE_NAME_STR_H__
 		" [with " <<
-		__STRINGIFY(T) << " = " << type_name_str<T>() << "; " <<
+		__STRINGIFY(T) << " = " << type_name_str<T>() << ", " <<
 		__STRINGIFY(U) << " = " << type_name_str<U>() << "]" <<
   #endif
 		std::endl;
@@ -38,54 +43,54 @@ template<typename U> __VECTOR_3D__INLINE void vector_3d<T>::log(const char * _me
 // vector_3d()
 template<typename T> __VECTOR_3D__INLINE vector_3d<T>::vector_3d(): _data{0, 0, 0}
 {
-	this->log("vector_3d()");
+	__VEC3D_LOG1( this, "vector_3d()");
 }
 // ~vector_3d()
 template<typename T> __VECTOR_3D__INLINE vector_3d<T>::~vector_3d()
 {
-	this->log("~vector_3d()");
+	__VEC3D_LOG1( this, "~vector_3d()");
 }
 // vector_3d( Type const & , Type const & , Type const & )
 template<typename T>
 template<typename U> __VECTOR_3D__INLINE vector_3d<T>::vector_3d( U const & _x, U const & _y, U const & _z ): _data{ T(_x), T(_y), T(_z) }
 {
-	this->log<U>("vector_3d(U const & , U const & , U const & )");
+	__VEC3D_LOG2( U, this, "vector_3d(U const & , U const & , U const & )");
 }
 template<typename T> __VECTOR_3D__INLINE vector_3d<T>::vector_3d( T const & _x, T const & _y, T const & _z ): _data{ _x, _y, _z }
 {
-	this->log("vector_3d(T const & , T const & , T const & )");
+	__VEC3D_LOG1( this, "vector_3d(T const & , T const & , T const & )");
 }
 // vector_3d( Type const * )
 template<typename T>
 template<typename U> __VECTOR_3D__INLINE vector_3d<T>::vector_3d( U const * v ) : _data{ T(v[0]), T(v[1]), T(v[2]) }
 {
-	this->log<U>("vector_3d(U const * )");
+	__VEC3D_LOG2( U, this, "vector_3d(U const * )");
 }
 template<typename T> __VECTOR_3D__INLINE vector_3d<T>::vector_3d( T const * v ) : _data{ v[0], v[1], v[2] }
 {
-	this->log("vector_3d(T const * )");
+	__VEC3D_LOG1( this, "vector_3d(T const * )");
 }
 // vector_3d( vector_3d<Type> const & )
 template<typename T>
 template<typename U> __VECTOR_3D__INLINE vector_3d<T>::vector_3d( vector_3d<U> const & v ) : _data{ T(v[0]), T(v[1]), T(v[2]) }
 {
-	this->log<U>("vector_3d( vector_3d<U> const & )");
+	__VEC3D_LOG2( U, this, "vector_3d( vector_3d<U> const & )");
 }
 template<typename T> __VECTOR_3D__INLINE vector_3d<T>::vector_3d( vector_3d<T> const & v ) : _data{ v[0], v[1], v[2] }
 {
-	this->log("vector_3d( vector_3d<T> const & )");
+	__VEC3D_LOG1( this, "vector_3d( vector_3d<T> const & )");
 }
 
 // operator=( vector_3d<Type> const & )
 template<typename T>
 template<typename U> __VECTOR_3D__INLINE vector_3d<T> & vector_3d<T>::operator=( vector_3d<U> const & v )
 {
-	this->log<U>("operator=( vector_3d<U> const & )");
+	__VEC3D_LOG2( U, this, "operator=( vector_3d<U> const & )");
 	return this->operator=( v.data() );
 }
 template<typename T> __VECTOR_3D__INLINE vector_3d<T> & vector_3d<T>::operator=( vector_3d<T> const & v )
 {
-	this->log("operator=( vector_3d<T> const & )");
+	__VEC3D_LOG1( this, "operator=( vector_3d<T> const & )");
 	if( this == &v )
 		return *this;
 	return this->operator=( v.data() );
