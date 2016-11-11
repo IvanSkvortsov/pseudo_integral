@@ -1,0 +1,5 @@
+libspherical.a
+
+it contains *.o: poly.n.o, polynomial.o, orthogonal.o, legendre.o, spherical.o, array.n.o, array.scp.o x.spherical.o
+files array.n.o, array.scp.o are copied from directory './array/'
+in order to use this library one should include 'spherical.h', 'x.spherical.h' files and compile with '-I ./array/' and '-L. libspherical.a'
