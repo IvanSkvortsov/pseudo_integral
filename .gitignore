@@ -1,0 +1,96 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Vim swap files.
+*.swp
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+p2pvc
+video
+audio
+
+# my files/dirs
+file.err
+*.map
+*.mmap
+get.work.time.h
+env
+mmap.h
+__mpreal.h
+__old_omega/
+__old_vec/
+args.h
+args/
+blacksmith/
+env.h
+file.inp
+file.log
+file.r_s
+file.ra_s
+file.rb_s
+hyperg.h
+i.xyz.spherical.txt
+integral.h
+integral/
+main.cpp
+main.h
+map.stream.h
+math_.h
+omega.h
+qu.integral.h
+qu/
+run.rebuild.sh
+spherical.harmonics.h
+strlib
+xyz.p.integral.h
+xyz.spherical.h
+xyz_spherical/
+# alpha/
+alpha/*.siz.*
+# omega
+omega/trash/
+omega/rpown.*
+omega/ixs.omega.*log*
+omega/run.*sh
+omega/slm.compute.r.*
+omega/spherical.pown.*
+# array
+array/*old.h
+array/*old.cpp
+# spherical
+spherical/array
+spherical/data_s/
+spherical/array.*
+spherical/poly.n.*
+spherical/r.spherical.*
+spherical/x.polynomial.*
+spherical/x.spherical.*
+spherical/*old.h
+# xyz_pown_integral
+xyz_pown_integral/*old.h
+# math
+math/*/
