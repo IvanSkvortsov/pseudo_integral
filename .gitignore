@@ -100,3 +100,14 @@ vector_3d_/vector.struct.h
 vector_3d_/file.err
 vector_3d_/struct.demo.cpp
 vector_3d_/__old/
+# memorystream
+memorystream/setw.*
+memorystream/enum.*
+memorystream/case.*
+# mmap
+mmap/memory.map.out*
+mmap/memory.map.old.*
+mmap/memory.map.old.*
+mmap/*/
+mmap/size.of.int.types.*
+mmap/.MemoryMapped.*
