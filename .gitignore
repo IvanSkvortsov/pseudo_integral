@@ -94,3 +94,9 @@ spherical/*old.h
 xyz_pown_integral/*old.h
 # math
 math/*/
+# vector_3d_
+vector_3d_/vector.nd.h
+vector_3d_/vector.struct.h
+vector_3d_/file.err
+vector_3d_/struct.demo.cpp
+vector_3d_/__old/
