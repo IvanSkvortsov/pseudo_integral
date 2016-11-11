@@ -1,0 +1,39 @@
+library: libsfmath.a
+
+to use math functions of this library one needs to include 'sf.math.h' and compile with 'libsfmath.a' archive;
+functions are:
+
+'equality/'
+template<typename T> bool math::is_zero(T const & );
+template<typename T> bool math::is_equal(T const & , T const & );
+template<typename T> bool math::is_equal(T const * , T const * , int );
+
+'expmanip/' T = float, double, long double, mpfr::mpreal
+uint32_t get_exp_u(T const & v);
+int      get_exp  (T const & v);
+int      get_e    (T const & v);
+
+void     set_exp  (T const & v);
+void     set_e    (T const & v);
+
+void     add_exp  (T const & v);
+void     add_e    (T const & v);
+
+void     zero_exp (T const & v);
+void     zero_e   (T const & v);
+
+'fact/'
+long double fact_n(int n);    // n!
+long double fact_2n1(int n);  // n!!, n - odd
+long double fact_2n1_n(int n);// (2n+1)!!
+
+'log/'
+int logn(int x, int base);// approximate log value
+
+'pow/'
+template<typename T> void pown(T const & x, int n);
+
+
+all files are distributed by corresponding directories: equality/, expmanip/, fact/, log/, pow/;
+all mentioned directories have own makefile;
+some of directories contains demonstrative routines, e.i. get.exp.demo.h and get.exp.main.cpp in directory expmanip/;

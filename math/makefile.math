@@ -1,0 +1,55 @@
+CXX=g++
+CXXFLAGS=-I /home/Ivan/cpp/lib/ -I ../
+OBJECTS=equality.o get.exp.o set.exp.o add.exp.o zero.exp.o fact.2n1.o pown.o fact.n.o logn.o binom.o fact.p.o
+LIBRARIES=-lgmp -lmpfr
+.PHONY: clean
+
+libsfmath.a: $(OBJECTS) sf.math.h sf.machine.h
+	ar cr $@ $(OBJECTS)
+
+equality.o: equality.h equality.hpp equality.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ equality.cpp $(LIBRARIES)
+
+get.exp.o: get.exp.h get.exp.hpp get.exp.cpp expmanip.config.h
+	$(CXX) $(CXXFLAGS) -c -o $@ get.exp.cpp $(LIBRARIES)
+
+set.exp.o: set.exp.h set.exp.hpp set.exp.cpp expmanip.config.h
+	$(CXX) $(CXXFLAGS) -c -o $@ set.exp.cpp $(LIBRARIES)
+
+add.exp.o: add.exp.h add.exp.hpp add.exp.cpp expmanip.config.h
+	$(CXX) $(CXXFLAGS) -c -o $@ add.exp.cpp $(LIBRARIES)
+
+zero.exp.o: zero.exp.h zero.exp.hpp zero.exp.cpp expmanip.config.h
+	$(CXX) $(CXXFLAGS) -c -o $@ zero.exp.cpp $(LIBRARIES)
+
+libexpmanip.a: get.exp.o set.exp.o add.exp.o zero.exp.o
+	ar cr $@ get.exp.o set.exp.o add.exp.o zero.exp.o
+
+fact.p.o: fact.h fact.p.hpp fact.p.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ fact.p.cpp $(LIBRARIES)
+
+fact.n.o: fact.h fact.n.hpp fact.n.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ fact.n.cpp $(LIBRARIES)
+
+fact.2n1.o: fact.h fact.2n1.hpp fact.2n1.cpp
+	$(CXX) -c -o $@ fact.2n1.cpp
+
+libfact.a: fact.n.o fact.2n1.o
+	ar cr $@ fact.n.o fact.2n1.o
+
+logn.o: logn.h logn.hpp logn.cpp
+	$(CXX) -c -o $@ logn.cpp
+
+pown.o: pown.h pown.hpp pown.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ pown.cpp $(LIBRARIES)
+
+binom.o: binom.h binom.hpp binom.cpp \
+	binom.uint32.0.hpp binom.uint32.1.hpp binom.uint32.2.hpp \
+	binom.uint64.0.hpp binom.uint64.1.hpp binom.uint64.2.hpp
+	$(CXX) -c -o $@ binom.cpp
+
+numeric.constants.o: numeric.constants.h numeric.constants.hpp numeric.constants.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $(LIBRARIES)
+
+clean:
+	rm *.o *.a
