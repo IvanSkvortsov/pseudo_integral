@@ -27,38 +27,38 @@ struct _Bit_reference
 protected:
 	friend class data_array<bool>;
 	friend class data_pointer<bool>;
-	inline _Bit_reference();
+	_Bit_reference();
 	int * _data;
 	int _mask;
 public:
-	inline ~_Bit_reference();
-	inline operator bool () const;
-	inline _Bit_reference & operator=(const bool x);
-	inline _Bit_reference & operator=(const _Bit_reference & x);
-	inline void flip();
+	~_Bit_reference();
+	operator bool () const;
+	_Bit_reference & operator=(const bool x);
+	_Bit_reference & operator=(const _Bit_reference & x);
+	void flip();
 };
 	
-_Bit_reference::_Bit_reference():_data(0), _mask(0){}
-_Bit_reference::~_Bit_reference()
+inline _Bit_reference::_Bit_reference():_data(0), _mask(0){}
+inline _Bit_reference::~_Bit_reference()
 {
 	this->_data = 0;
 	this->_mask = 0;
 }
-void _Bit_reference::flip()
+inline void _Bit_reference::flip()
 {
 	*this->_data ^= this->_mask;
 }
-_Bit_reference::operator bool()const
+inline _Bit_reference::operator bool()const
 {
 	return *this->_data & this->_mask;
 }
-_Bit_reference & _Bit_reference::operator=( const bool x)
+inline _Bit_reference & _Bit_reference::operator=( const bool x)
 {
 	if( (bool)*this != x )
 		this->flip();
 	return *this;
 }
-_Bit_reference & _Bit_reference::operator=( const _Bit_reference & x)
+inline _Bit_reference & _Bit_reference::operator=( const _Bit_reference & x)
 {
 	return this->operator=( (bool)x );
 }
@@ -183,43 +183,6 @@ public:
 
 	__DATA_BOOL_INTERFACE;
 };
-
-/*
-template<typename T>
-struct data_allocator
-{
-	inline T * allocate(const int __size)
-	{
-		return (T *)::operator new( sizeof(T) * __size );
-	}
-	inline void construct( T * __pointer, const int __size )
-	{
-		if( !__pointer || __size <= 0 ) return;
-		T const * __end = __pointer + __size;
-		while( __pointer < __end )
-			new(__pointer++) T();
-	}
-	inline void construct( T * __pointer, const T & __value, const int __size )
-	{
-		if( !__pointer || __size <= 0 ) return;
-		T const * __end = __pointer + __size;
-		while( __pointer < __end )
-			new(__pointer++) T(__value);
-	}
-	inline void destruct(T * __pointer, const int __size )
-	{
-		if( !__pointer || __size <= 0 ) return;
-		T const * __end = __pointer + __size;
-		while( __pointer < __end )
-			__pointer++->~T();
-	}
-	inline void free(T * __pointer)
-	{
-		if( __pointer )
-			::operator delete( __pointer );
-	}
-};
-*/
 
 #pragma pack(pop)
 

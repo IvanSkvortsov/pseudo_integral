@@ -300,37 +300,6 @@ public:
 template<typename T> using matrix_cursor_1 = matrix_cursor<T,1>;
 
 template<typename T> using matrix_pointer_1 = matrix_pointer<T,1>;
-/*
-template<typename T>
-struct matrix_pointer_1
-{
-	__DATA_TYPEDEF( T );
-	typedef int size_type;
-protected:
-	size_type _size;
-	T * _data;
-public:
-	inline matrix_pointer_1():_size(0), _data(0){}
-	inline matrix_pointer_1(matrix_pointer_1<T> const & v): _size(v._size), _data(v._data){}
-	inline matrix_pointer_1<T> & operator=( matrix_pointer_1<T> const & v)
-	{
-		if( this == &v )
-			return *this;
-		this->_size = v.size();
-		this->_data = (T *)v.data();
-		//for(int i = 0; i < this->size(); ++i)
-		//	this->_data[i] = v[i];
-		return *this;
-	}
-	inline size_type & size(){ return this->_size;}
-	inline const size_type & size()const{ return this->_size;}
-	inline const_reference operator[](int i)const{ return this->_data[i];}
-	inline reference operator[](int i){ return this->_data[i];}
-	inline void data(pointer __data){this->_data = __data;}
-	inline pointer data(){ return this->_data;}
-	inline const_pointer data()const{ return this->_data;}
-};
-*/
 
 #define MATRIX_POINTER_SPEC( type )\
 	template struct matrix_pointer<type,4>;\
