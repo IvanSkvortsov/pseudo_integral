@@ -33,7 +33,15 @@ p2pvc
 video
 audio
 
-# my files/dirs
+# my dirs
+__old_omega/
+__old_vec/
+args/
+blacksmith/
+integral/
+qu/
+xyz_spherical/
+# my files
 file.err
 *.map
 *.mmap
@@ -41,11 +49,7 @@ get.work.time.h
 env
 mmap.h
 __mpreal.h
-__old_omega/
-__old_vec/
 args.h
-args/
-blacksmith/
 env.h
 file.inp
 file.log
@@ -55,20 +59,17 @@ file.rb_s
 hyperg.h
 i.xyz.spherical.txt
 integral.h
-integral/
 main.cpp
 main.h
 map.stream.h
 math_.h
 omega.h
 qu.integral.h
-qu/
 run.rebuild.sh
 spherical.harmonics.h
 strlib
 xyz.p.integral.h
 xyz.spherical.h
-xyz_spherical/
 # alpha/
 alpha/*.siz.*
 # omega
