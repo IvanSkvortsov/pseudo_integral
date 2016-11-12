@@ -113,3 +113,5 @@ mmap/size.of.int.types.*
 mmap/.MemoryMapped.*
 # radial
 radial/qu.radial.alp.h
+# basis
+basis/basis.map.*
