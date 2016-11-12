@@ -115,3 +115,5 @@ mmap/.MemoryMapped.*
 radial/qu.radial.alp.h
 # basis
 basis/basis.map.*
+# pseudo
+pseudo/test.cpp
