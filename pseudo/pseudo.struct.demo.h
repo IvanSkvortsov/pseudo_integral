@@ -47,24 +47,52 @@ int demo_pseudo( char const * file, const int task_num = 1 )
 		pseudo_task_01_write_geom<T>( file_geom, _geoms );
 		pseudo_task_01_write_basis<T>( file_basis, _alps, _angs );
 		pseudo_task_01_write_ecp<T>( file_ecp, _alps, _angs );
+
+		to_compute_set_a_xyz( _angs.ax );
+		to_compute_set_b_xyz( _angs.bx );
 	}
 	pseud.run_pseudo( file );
+	if( pseud.is_mapping_mid() )
+		pseud.ixs_dat.test_ang_mid();
+	else if( pseud.is_mapping_max() )
+		pseud.ixs_dat.test_ang_max( pseud.alp_s );
 	pseud.comp_pseudo();
 	pseud.qu_dat.test_print( std::clog );
 
-	if( !(pseud.to_flip() && pseud.is_mapping_mid()) )
+	if( (pseud.to_flip() && pseud.is_mapping_mid()) )
+	{
+		_geoms.flip();
+		_alps.flip();
 		_angs.flip();
+	}
 
 	pseudo_index idx;
+	const int * ax = _angs.ax;
+	const int * bx = _angs.bx;
 	idx.set_la( _angs.la );
-	idx.set_axyz( _angs.ax[0], _angs.ax[1], _angs.ax[2] );
+	idx.set_axyz( ax[0], ax[1], ax[2] );
 	idx.set_lb( _angs.lb );
-	idx.set_bxyz( _angs.bx[0], _angs.bx[1], _angs.bx[2] );
-	const int * ax = idx.ax;
-	const int * bx = idx.bx;
+	idx.set_bxyz( bx[0], bx[1], bx[2] );
+	ax = idx.ax;
+	bx = idx.bx;
 	pseud.print_cx();
+	_geoms.print( std::clog );
+	_alps.print( std::clog );
+	_angs.print( std::clog );
+
 	std::clog << "la = " << idx.get_la() << ", ax = " << ax[0] << ", ay = " << ax[1] << ", az = " << ax[2] << std::endl;
 	std::clog << "lb = " << idx.get_lb() << ", bx = " << bx[0] << ", by = " << bx[1] << ", bz = " << bx[2] << std::endl;
+
+	std::clog << "to_compute:" << std::endl;
+	std::clog << "la = " << to_compute::get_la() <<
+		", ax = " << to_compute::get_ax() << ", ay = " << to_compute::get_ay() << ", az = " << to_compute::get_az() << std::endl;
+	std::clog << "lb = " << to_compute::get_lb() <<
+		", bx = " << to_compute::get_bx() << ", by = " << to_compute::get_by() << ", bz = " << to_compute::get_bz() << std::endl;
+
+	std::clog << "pseudo alphas" << std::endl;
+	std::clog << "alp_a: " << std::setw(25) << pseud.pseudo.get_alp_a( idx ) << std::endl;
+	std::clog << "alp_b: " << std::setw(25) << pseud.pseudo.get_alp_b( idx ) << std::endl;
+	std::clog << "alp_c: " << std::setw(25) << pseud.pseudo.get_alp_c( idx ) << std::endl;
 
 	T v, s = 0;
 	for(int l = 0; l < pseud.alp_mem.l_max(); ++l)

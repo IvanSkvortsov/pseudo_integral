@@ -22,9 +22,21 @@ template<typename T, typename U> pseudo_integral<T,U> & pseudo_integral<T,U>::op
 template<typename T, typename U> typename pseudo_integral<T,U>::const_reference pseudo_integral<T,U>::get_prim( pseudo_index const & idx )
 {
 	static const T zero = 0; 
-	if( this->is_mapping_min() && idx.get_lb()%2 != idx.get_la()%2 && idx.get_l()%2 != idx.get_lb()%2 )
+	const bool is_4ab = idx.get_la()%2 != idx.get_lb()%2;
+	const bool is_4bc = (idx.get_l()%2 != idx.get_lb()%2) || (idx.get_l() > idx.get_lb());
+	const bool is_4ac = (idx.get_l()%2 != idx.get_la()%2) || (idx.get_l() > idx.get_la());
+	const bool is_local = idx.get_l() == this->alpha_map::l_max();
+	if
+	( this->is_mapping_min()
+		&& !(is_local)
+		&& (is_4ab || is_4bc || is_4ac)
+	)
 		return zero;
-	else if( this->is_mapping_mid() && idx.get_l()%2 != idx.get_lb()%2 && idx.get_l() != this->alpha_map::l_max() )
+	else if
+	( this->is_mapping_mid()
+		&& !(is_local)
+		&& (is_4bc)
+	)
 		return zero;
 	// la, {ax, ay, az}
 	this->map3node_set_la( idx.get_la() );
@@ -44,6 +56,28 @@ template<typename T, typename U> typename pseudo_integral<T,U>::const_reference 
 	this->prim_set_ic( idx.get_ic_p() );
 	this->prim_set_idx();
 	return this->prim_value();
+}
+
+template<typename T, typename U> typename pseudo_integral<T,U>::const_reference pseudo_integral<T,U>::get_alp_a( pseudo_index const & idx )
+{
+	this->alpha_map::map1A_set_lx( idx.get_la() );
+	this->alpha_map::map1A_set_ix( idx.get_ia_p() );
+	this->alpha_val<T,U>::mx1A_set_idx();
+	return this->alpha_val<T,U>::mx1A();
+}
+template<typename T, typename U> typename pseudo_integral<T,U>::const_reference pseudo_integral<T,U>::get_alp_b( pseudo_index const & idx )
+{
+	this->alpha_map::map1B_set_lx( idx.get_lb() );
+	this->alpha_map::map1B_set_ix( idx.get_ib_p() );
+	this->alpha_val<T,U>::mx1B_set_idx();
+	return this->alpha_val<T,U>::mx1B();
+}
+template<typename T, typename U> typename pseudo_integral<T,U>::const_reference pseudo_integral<T,U>::get_alp_c( pseudo_index const & idx )
+{
+	this->alpha_map::map1C_set_lx( idx.get_l() );
+	this->alpha_map::map1C_set_ix( idx.get_ic_p() );
+	this->alpha_val<T,U>::mx1C_set_idx();
+	return this->alpha_val<T,U>::mx1C();
 }
 
 template<typename T, typename U> typename pseudo_integral<T,U>::const_reference pseudo_integral<T,U>::get_func( pseudo_index const & idx )
@@ -170,7 +204,7 @@ pseudo_integral<T,U>::comp_mx1##X##_size_mid()\
 			this->alpha_map::map3X##_set_lb( lb );\
 			/* semi-local*/\
 			_lb_size_ = 0;\
-			for(int l = lb%2; l < this->alpha_map::l_max(); l += 2 )\
+			for(int l = lb%2; l < this->alpha_map::l_max() && l <= lb; l += 2 )\
 			{\
 				this->alpha_map::map3X##_set_l( l );\
 				_lb_size_ += this->alpha_map::map3X##_size();\
@@ -202,7 +236,7 @@ pseudo_integral<T,U>::comp_mx1##X##_size_min()\
 			this->alpha_map::map3X##_set_lb( lb );\
 			/* semi-local*/\
 			_lb_size_ = 0;\
-			for(int l = lb%2; l < this->alpha_map::l_max(); l += 2 )\
+			for(int l = lb%2; l < this->alpha_map::l_max() && l <= lb && l <= la; l += 2 )\
 			{\
 				this->alpha_map::map3X##_set_l( l );\
 				_lb_size_ += this->alpha_map::map3X##_size();\
@@ -272,7 +306,7 @@ pseudo_integral<T,U>::comp_mx1T_2x_size_mid()
 			this->alpha_map::map3ABC_d_set_lb( lb );
 			// semi-local
 			_lb_size_ = 0;
-			for(int l = lb%2; l < this->alpha_map::l_max(); l += 2 )
+			for(int l = lb%2; l < this->alpha_map::l_max() && l <= lb; l += 2 )
 			{
 				this->alpha_map::map3ABC_set_l( l );
 				this->alpha_map::map3ABC_d_set_l( l );
@@ -310,7 +344,7 @@ pseudo_integral<T,U>::comp_mx1T_2x_size_min()
 			this->alpha_map::map3ABC_d_set_lb( lb );
 			// semi-local
 			_lb_size_ = 0;
-			for(int l = lb%2; l < this->alpha_map::l_max(); l += 2 )
+			for(int l = lb%2; l < this->alpha_map::l_max() && l <= lb && l <= la; l += 2 )
 			{
 				this->alpha_map::map3ABC_set_l( l );
 				this->alpha_map::map3ABC_d_set_l( l );
@@ -473,7 +507,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::init_map_mid()
 				{
 					this->map3node_set_bxyz( ilb );
 					// semi-local
-					for(int l = lb%2; l < this->alpha_map::l_max(); l += 2 )
+					for(int l = lb%2; l < this->alpha_map::l_max() && l <= lb; l += 2 )
 					{
 						this->map3node_set_l( l );
 						this->prim_set_l( l );
@@ -529,7 +563,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::init_map_min()
 				{
 					this->map3node_set_bxyz( ilb );
 					// semi-local
-					for(int l = lb%2; l < this->alpha_map::l_max(); l += 2 )
+					for(int l = lb%2; l < this->alpha_map::l_max() && l <= lb && l <= la; l += 2 )
 					{
 						this->map3node_set_l( l );
 						this->prim_set_l( l );
@@ -933,7 +967,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid( qu_ra
 					//to_compute_set_b( lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
 					//if( !to_compute_value ) continue;
 					// semi-local
-					for(int l = lb%2; l < this->alpha_map::l_max(); l += 2 )
+					for(int l = lb%2; l < this->alpha_map::l_max() && l <= lb; l += 2 )
 					{
 						_lxyz.l = l;
 						this->map3node_set_l( l );
@@ -964,7 +998,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid( qu_ra
 			}
 		}
 	}
-	//__pseudo_assert__( __size == this->comp_mx1prim_size_mid() );
+	__pseudo_assert__( __size == this->comp_mx1prim_size_mid() );
 	return;
 }
 
@@ -976,7 +1010,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 	{
 		this->prim_set_ia( ia );// <- %map1A_set_ix( ia )
 		qu_rad.qu_dat_set_ia( ia );
-		//this->mx1kA_set_idx();// TODO: remove
+		this->mx1kA_set_idx();// TODO: remove
 		for(int ib = 0; ib < this->alpha_map::map1B_size(); ++ib )
 		{
 			this->prim_set_ib( ib );// <- %map1B_set_ix( ib )
@@ -992,7 +1026,10 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 		}
 	}
 #ifdef  __PSEUDO_INTEGRAL_COMP_PRIM_PRINT
-	std::clog << std::setw(25) << std::setprecision(15) << std::scientific << psi_value << std::endl;
+	to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
+	to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
+	if( to_compute_value )
+		std::clog << std::setw(25) << std::setprecision(15) << std::scientific << psi_value << std::endl;
 #endif
 }
 template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLocal_b( T & psi_value, _lxyz_struct const & _lxyz,
@@ -1021,15 +1058,15 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 			qu_rad.qu_radial_map::qu_set_lmb_a( lmb );
 			qu_rad.qu_radial_map::qu_set_lmb_b( 0 );
 			qu_rad.qu_dat_set_id( qu_rad.qu_radial_map::qu_idx() );
-			//this->mx1A_set_idx();
-			//this->mx1B_set_idx();
-			//this->mx1C_set_idx();
-			//T _alp = this->mx1A();
-			//_alp  += this->mx1B();
-			//_alp  += this->mx1C();
-			//T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
-			//psi_value += q_int * *__p_mx1ang;
-			psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
+			this->mx1A_set_idx();
+			this->mx1B_set_idx();
+			this->mx1C_set_idx();
+			T _alp = this->mx1A();
+			_alp  += this->mx1B();
+			_alp  += this->mx1C();
+			T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
+			psi_value += q_int * *__p_mx1ang;
+			//psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
 #ifdef  __PSEUDO_INTEGRAL_COMP_PRIM_PRINT
 		to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
 		to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
@@ -1055,7 +1092,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 				std::setw(6) << N << std::setw(3) << na << std::setw(4) << lmb <<
 				std::setw(25) << std::setprecision(15) << std::scientific << *__p_mx1ang <<
 				std::setw(25) << std::setprecision(15) << std::scientific << qu_rad.qu_dat_value() <<
-				//std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
+				std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
 				std::setw(25) << std::setprecision(15) << std::scientific << psi_value <<
 				std::endl;
 			++iter;
@@ -1072,7 +1109,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local(
 	for(int ia = 0; ia < this->alpha_map::map1A_size(); ++ia )
 	{
 		this->prim_set_ia( ia );// <- %map1A_set_ix( ia )
-		//this->mx1kA_set_idx();// TODO: remove
+		this->mx1kA_set_idx();// TODO: remove
 		qu_rad.qu_dat_set_ia( ia );
 		for(int ib = 0; ib < this->alpha_map::map1B_size(); ++ib )
 		{
@@ -1090,7 +1127,10 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local(
 		}
 	}
 #ifdef  __PSEUDO_INTEGRAL_COMP_PRIM_PRINT
-	std::clog << std::setw(25) << std::setprecision(15) << std::scientific << psi_value << std::endl;
+	to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
+	to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
+	if( to_compute_value )
+		std::clog << std::setw(25) << std::setprecision(15) << std::scientific << psi_value << std::endl;
 #endif
 }
 template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local_b( T & psi_value, _lxyz_struct const & _lxyz,
@@ -1098,6 +1138,8 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local_
 {
 #ifdef  __PSEUDO_INTEGRAL_COMP_PRIM_PRINT
 	static int iter = 0;
+	to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
+	to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
 #endif
 	int __size = 0;
 	pointer __p_mx1ang = ixs_ang.mx1ang_data();
@@ -1120,18 +1162,16 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local_
 			qu_rad.qu_radial_map::qu_set_lmb_a( lmb );
 			qu_rad.qu_radial_map::qu_set_lmb_b( 0 );
 			qu_rad.qu_dat_set_id( qu_rad.qu_radial_map::qu_idx() );
-			//this->mx1A_set_idx();
-			//this->mx1B_set_idx();
-			//this->mx1C_set_idx();
-			//T _alp = this->mx1A(); 
-			//_alp  += this->mx1B(); 
-			//_alp  += this->mx1C(); 
-			//T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
-			//psi_value += q_int * *__p_mx1ang;
-			psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
+			this->mx1A_set_idx();
+			this->mx1B_set_idx();
+			this->mx1C_set_idx();
+			T _alp = this->mx1A(); 
+			_alp  += this->mx1B(); 
+			_alp  += this->mx1C(); 
+			T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
+			psi_value += q_int * *__p_mx1ang;
+			//psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
 #ifdef  __PSEUDO_INTEGRAL_COMP_PRIM_PRINT
-		to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
-		to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
 		if( to_compute_value )
 		{
 			if( iter == 0 )
@@ -1154,7 +1194,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local_
 				std::setw(6) << N << std::setw(3) << na << std::setw(4) << lmb <<
 				std::setw(25) << std::setprecision(15) << std::scientific << *__p_mx1ang <<
 				std::setw(25) << std::setprecision(15) << std::scientific << qu_rad.qu_dat_value() <<
-				//std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
+				std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
 				std::setw(25) << std::setprecision(15) << std::scientific << psi_value <<
 				std::endl;
 			++iter;
@@ -1163,6 +1203,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local_
 		}
 	}
 #ifdef  __PSEUDO_INTEGRAL_COMP_PRIM_PRINT
+	if( to_compute_value )
 	std::clog << 
 		std::setw(3) << _lxyz.la << std::setw(4) << _lxyz.ax << std::setw(3) << _lxyz.ay << std::setw(3) << _lxyz.az <<
 		std::setw(4) << _lxyz.lb << std::setw(4) << _lxyz.bx << std::setw(3) << _lxyz.by << std::setw(3) << _lxyz.bz <<
@@ -1208,7 +1249,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_min( ixs_a
 					ixs_ang.map3node_set_ib( ilb );
 					i2abc( lb, ilb_size, ilb, bx, by ); bz = lb - bx - by;
 					// semi-local
-					for(int l = lb%2; l < this->alpha_map::l_max(); l += 2 )
+					for(int l = lb%2; l < this->alpha_map::l_max() && l <= lb && l <= la; l += 2 )
 					{
 						//_lx.l = l;
 						this->map3node_set_l( l );
@@ -1414,7 +1455,7 @@ void pseudo_integral<T,U>::comp_func_mid( basis_set<U> const & basA, ecp_set<U> 
 					this->alpha_map::map2AB_norm_set_bxyz( ilb );
 					//i2abc( lb, ilb_size, ilb, _lxyz.bx, _lxyz.by ); _lxyz.bz = lb - _lxyz.bx - _lxyz.by;
 					// semi-local
-					for(int l = lb%2; l < this->alpha_map::l_max(); l += 2 )
+					for(int l = lb%2; l < this->alpha_map::l_max() && l <= lb; l += 2 )
 					{
 						//_lxyz.l = l;
 						this->map3node_set_l( l );
@@ -1487,7 +1528,7 @@ void pseudo_integral<T,U>::comp_func_min( basis_set<U> const & basA, ecp_set<U> 
 					this->alpha_map::map2AB_norm_set_bxyz( ilb );
 					//i2abc( lb, ilb_size, ilb, _lxyz.bx, _lxyz.by ); _lxyz.bz = lb - _lxyz.bx - _lxyz.by;
 					// semi-local
-					for(int l = lb%2; l < this->alpha_map::l_max(); l += 2 )
+					for(int l = lb%2; l < this->alpha_map::l_max() && l <= lb && l <= la; l += 2 )
 					{
 						//_lxyz.l = l;
 						this->map3node_set_l( l );

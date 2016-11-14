@@ -100,19 +100,19 @@ inline int const & map3node_##X##_size()const\
 inline void X##_set_la( const int la )\
 {\
 	this->alpha_map::map1A##_set_lx( la );\
-	/*this->alpha_map::map3ABC##_set_la( la );*/\
+	this->alpha_map::map3ABC##_set_la( la );\
 }\
 inline void X##_set_axyz( const int i ){ this->map3node_set_axyz( i ); }\
 inline void X##_set_lb( const int lb )\
 {\
 	this->alpha_map::map1B##_set_lx( lb );\
-	/*this->alpha_map::map3ABC##_set_lb( lb );*/\
+	this->alpha_map::map3ABC##_set_lb( lb );\
 }\
 inline void X##_set_bxyz( const int i ){ this->map3node_set_bxyz( i ); }\
 inline void X##_set_l( const int l )/* need map3node_set_l( int ) to be set*/\
 {\
 	this->alpha_map::map1C##_set_lx(  l );\
-	/*this->alpha_map::map3ABC##_set_l( l );*/\
+	this->alpha_map::map3ABC##_set_l( l );\
 	this->mx1##X##_set_it();\
 }\
 inline void X##_set_lmax(){ this->X##_set_l( this->alpha_map::l_max() ); }\
@@ -385,6 +385,9 @@ public:
 	// 11.   %prim_value(); use it
 	const_reference get_prim( pseudo_index const & idx );
 	const_reference get_func( pseudo_index const & idx );
+	const_reference get_alp_a(pseudo_index const & idx );
+	const_reference get_alp_b(pseudo_index const & idx );
+	const_reference get_alp_c(pseudo_index const & idx );
 };
 
 #endif//__PSEUSO_INTEGRAL_H__
