@@ -1,7 +1,7 @@
 #ifndef __IXS_ANGULAR_IDX_H__
 #define __IXS_ANGULAR_IDX_H__
 
-//#define __TO_COMPUTE__
+#define __TO_COMPUTE__
 #ifdef  __TO_COMPUTE__
   #define to_compute_set_a_xyz( ax ) to_compute::set_a_xyz( ax )
   #define to_compute_set_b_xyz( bx ) to_compute::set_b_xyz( bx )

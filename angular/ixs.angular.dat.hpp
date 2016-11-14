@@ -137,11 +137,10 @@ void ixs_angular_dat<T,U>::comp_ang_max( geom_slm<U> & geom_s, alpha_slm<T,U> & 
 	{
 		_lxyz.la = la;
 		this->ixs_angular_map::map3node_set_la( la );
-		alp_s.map2slm_set_la( la );
-		alp_s.map1A_set_lx( la );
+		alp_s.map2slm_set_la( la );// for local-max part
+		alp_s.map1A_set_lx( la );  // for local-max part
 		//alp_s.map2AB_set_la( la );
 		qu_rad.qu_radial_map::qu_set_la( la );
-		//qu_rad.qu_dat_set_la( la );
 		for(int i_la = 0; i_la < ila_size; ++i_la)// ax, ay, az
 		{
 			i2abc( la, ila_size, i_la, _lxyz.ax, _lxyz.ay);
@@ -151,52 +150,48 @@ void ixs_angular_dat<T,U>::comp_ang_max( geom_slm<U> & geom_s, alpha_slm<T,U> & 
 			{
 				_lxyz.lb = lb;
 				this->ixs_angular_map::map3node_set_lb( lb );
-				alp_s.map2slm_set_lb( lb );
-				alp_s.map1B_set_lx( lb );
+				alp_s.map2slm_set_lb( lb );// local-max
+				alp_s.map1B_set_lx( lb );// local-max
 				//alp_s.map2AB_set_lb( lb );
 				qu_rad.qu_radial_map::qu_set_lb( lb );
-				//qu_rad.qu_dat_set_lb( lb );
 				for(int i_lb = 0; i_lb < ilb_size; ++i_lb )// bx, by, bz
 				{
 					i2abc( lb, ilb_size, i_lb, _lxyz.bx, _lxyz.by);
 					_lxyz.bz = lb - _lxyz.bx - _lxyz.by;
 					this->ixs_angular_map::map3node_set_ib( i_lb );
-					to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
-					to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
-					if( !to_compute_value ) continue;
+					//to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
+					//to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
+					//if( !to_compute_value ) continue;
 					// semi-local
 					for(int l = 0; l < this->ixs_angular_map::l_max(); ++l )
 					{
+						_lxyz.l = l;
 						this->ixs_angular_map::map3node_set_l( l );
-						//qu_rad.qu_dat_set_l( l );
-						qu_rad.qu_radial_map::qu_set_l( l );
 						__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
 						this->ixs_angular_map::map3nx2_set_l( l );
 						this->ixs_angular_map::map2lmbA_set_l( l );
 						this->ixs_angular_map::map2lmbB_set_l( l );
-						_lxyz.l = l;
+
+						qu_rad.qu_radial_map::qu_set_l( l );
 						this->comp_ang_max_SemiLocal( __p_mx1ang, _lxyz, geom_s, qu_rad, ixs_omg );
 					}
 					// local
 					this->ixs_angular_map::map3node_set_lmax();
-					//qu_rad.qu_dat_set_lmax();
-					qu_rad.qu_radial_map::qu_set_lmax();
 					__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
 					this->ixs_angular_map::map3nx2_set_lmax();
+
+					qu_rad.qu_radial_map::qu_set_lmax();
 					//this->comp_ang_max_Local( __p_mx1ang, _lxyz, geom_s, alp_s, ixs_omg );
 					for(int ia = 0; ia < alp_s.map1A_size(); ++ia)
 					{
 						alp_s.map2slm_set_ia( ia );
-						//qu_rad.qu_dat_set_ia( ia );
 						for(int ib = 0; ib < alp_s.map1B_size(); ++ib, __p_mx1ang += this->ixs_angular_map::map3node_size() )
 						{
 							alp_s.map2slm_set_ib( ib );
-							//qu_rad.qu_dat_set_ib( ib );
 							this->comp_ang_max_Local( __p_mx1ang, _lxyz, geom_s, alp_s, qu_rad, ixs_omg );
 						}
 					}
-					// spin-orbit part TODO
-					// ...
+					// TODO: spin-orbit part
 				}
 			}
 		}
@@ -240,9 +235,9 @@ void ixs_angular_dat<T,U>::comp_ang_max_Local(pointer __p_mx1ang, _lxyz_struct c
 			_nx.na_p_nb = na_p_nb;
 			ixs_omg_x.set_lx( na_p_nb );
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-			assert( ixs_ang.map3nx2() == (na + nb)/2 + 1 );
-			assert( alp_s.map2slm_size() >= (na_p_nb+1) *(na_p_nb+1) );// map2slm_size = (maximum ang.mom. + 1)^2
-			assert( ixs_omg_x.node1_n() == ixs_ang.map3nx2() );
+			__ixs_ang_assert__( ixs_ang.map3nx2() == (na + nb)/2 + 1 );
+			__ixs_ang_assert__( alp_s.map2slm_size() >= (na_p_nb+1) *(na_p_nb+1) );// map2slm_size = (maximum ang.mom. + 1)^2
+			__ixs_ang_assert__( ixs_omg_x.node1_n() == ixs_ang.map3nx2() );
 #endif
 			for(int i_lmb = 0, lmb = na_p_nb%2; i_lmb < ixs_ang.map3nx2(); ++i_lmb, lmb += 2, ++__p_mx1ang)
 			//for(int i_lmb = 0, lmb = na_p_nb%2; i_lmb < ixs_ang.map3nx2(); ++i_lmb, lmb += 2)
@@ -264,10 +259,10 @@ void ixs_angular_dat<T,U>::comp_ang_max_Local(pointer __p_mx1ang, _lxyz_struct c
 					}
 				}
 				*/
-				this->comp_ang_max_Local( angular_value, _lxyz, _nx, geom_s, alp_s, ixs_omg_x );
+				this->comp_ang_max_Local_b( angular_value, _lxyz, _nx, geom_s, alp_s, ixs_omg_x );
 				*__p_mx1ang = math::convert_float<T,U>( angular_value );
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-				assert( qu_rad.qu_radial_map::qu_idx() != qu_radial_map::MAP1QU_DAT_INIT_NUM );
+				__ixs_ang_assert__( qu_rad.qu_radial_map::qu_idx() != qu_radial_map::MAP1QU_DAT_INIT_NUM );
 #endif
 				if( angular_value != 0 )
 				{
@@ -306,7 +301,7 @@ template<typename T, typename U> inline void print_ang_max_Local_mu_sum( const i
 }
 
 template<typename T, typename U>
-void ixs_angular_dat<T,U>::comp_ang_max_Local(U & angular_value, _lxyz_struct const & _lxyz, _nx_struct const & _nx, 
+void ixs_angular_dat<T,U>::comp_ang_max_Local_b(U & angular_value, _lxyz_struct const & _lxyz, _nx_struct const & _nx, 
 		geom_slm<U> & geom_s, alpha_slm<T,U> & alp_s, ixs_omega<T,U> & ixs_omg_x )
 {
 	static U t1(0), t2_a(0), t3_a(0), t2_b(0), t3_b(0);
@@ -326,7 +321,6 @@ void ixs_angular_dat<T,U>::comp_ang_max_Local(U & angular_value, _lxyz_struct co
 		t2_a = geom_s.CA_x( ax_a );
 		t2_a *= math::cnk<u64_t>(_lxyz.ax, ax_a);
 		for(int b = 0, ay_b = _lxyz.ay, c = na_a, az_c = _lxyz.az - na_a;
-			//b <= _lxyz.ay && b <= na_a && c <= _lxyz.az;
 			b <= _lxyz.ay && b <= na_a;
 			++b, --c, --ay_b, ++az_c, ++it_a)
 		{
@@ -346,7 +340,6 @@ void ixs_angular_dat<T,U>::comp_ang_max_Local(U & angular_value, _lxyz_struct co
 				t2_b *= geom_s.CB_x( bx_d );
 				t2_b *= math::cnk<u64_t>(_lxyz.bx, bx_d);
 				for(int e = 0, f = nb_d, by_e = _lxyz.by, bz_f = _lxyz.bz - nb_d;
-					//e <= nb_d && e <= _lxyz.by && f <= _lxyz.bz;
 					e <= nb_d && e <= _lxyz.by;
 					++e, --f, --by_e, ++bz_f, ++it_b)
 				{
@@ -388,19 +381,19 @@ void ixs_angular_dat<T,U>::comp_ang_max_Local(U & angular_value, _lxyz_struct co
 						std::cerr << "n_size : " << ((_nx.na_p_nb+1)*(_nx.na_p_nb+2))/2 << std::endl;
 					}
 #endif
-					assert( ixs_omg_x.get_omg_data() != 0 );
-					assert( ixs_omg_x.get_omg_l() == 0 );
-					assert( ixs_omg_x.get_omg_lx() == _nx.na_p_nb );
-					assert( ixs_omg_x.get_omg_lmb() == _nx.lmbA );
-					assert( ixs_omg_x.get_omg_i_abc() == _i_abc );
+					__ixs_ang_assert__( ixs_omg_x.get_omg_data() != 0 );
+					__ixs_ang_assert__( ixs_omg_x.get_omg_l() == 0 );
+					__ixs_ang_assert__( ixs_omg_x.get_omg_lx() == _nx.na_p_nb );
+					__ixs_ang_assert__( ixs_omg_x.get_omg_lmb() == _nx.lmbA );
+					__ixs_ang_assert__( ixs_omg_x.get_omg_i_abc() == _i_abc );
 
-					assert( _i_abc < ((_nx.na_p_nb + 1) * (_nx.na_p_nb + 2))/2 );
-					assert( _i_abc >= 0 );
-					assert( ixs_omg_x.get_omg_data() !=  0 );
+					__ixs_ang_assert__( _i_abc < ((_nx.na_p_nb + 1) * (_nx.na_p_nb + 2))/2 );
+					__ixs_ang_assert__( _i_abc >= 0 );
+					__ixs_ang_assert__( ixs_omg_x.get_omg_data() !=  0 );
 #endif//__IXS_ANGULAR_DATA_DEBUG
 					p_omg_x = ixs_omg_x.get_omg_data();
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-					assert( p_omg_x != 0 );
+					__ixs_ang_assert__( p_omg_x != 0 );
 #endif
 
 					t3_b = t2_b;
@@ -413,9 +406,10 @@ void ixs_angular_dat<T,U>::comp_ang_max_Local(U & angular_value, _lxyz_struct co
 					for(int it_ox = 0; p_omg_xi->m == 0 && it_ox < x_size; ++it_ox, ++p_omg_xi)
 					{
 						t1 += alp_s.mx2slm( p_omg_xi->mu ) * p_omg_xi->d;
+#if defined( __IXS_ANGULAR_DATA_PRINT ) && defined(__IXS_ANGULAR_DATA_PRINT_DETAIL)
 						print_ang_max_Local_mu_sum( _it, IT_MAX, p_omg_xi->mu, p_omg_xi->m,\
 								alp_s.mx2slm( p_omg_xi->mu ), p_omg_xi->d, t1 );
-						//t1 += p_omg_xi->d;
+#endif
 					}
 					t1 *= t3_b;
 					angular_value += t1;
@@ -540,7 +534,7 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(pointer __p_mx1ang, _lxyz_stru
 			ixs_ang.map2lmbB_set_nx( nb );
 			__size += ixs_ang.map3nx2();// size += lmb_a_size * lmb_b_size
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-			assert( ixs_ang.map3nx2() == ixs_ang.map2lmbA_size() * ixs_ang.map2lmbB_size() );
+			__ixs_ang_assert__( ixs_ang.map3nx2() == ixs_ang.map2lmbA_size() * ixs_ang.map2lmbB_size() );
 #endif
 			_nx.nb = nb;
 			ixs_omg_b.set_lx( nb );
@@ -558,10 +552,10 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(pointer __p_mx1ang, _lxyz_stru
 					geom_s.slm_kB_set_lx( lmb_b );
 					ixs_omg_b.set_lambda_i( i_lmb_b );
 					// la, (ax,ay,az), lb, (bx,by,bz), l, na, nb
-					this->comp_ang_max_SemiLocal( angular_value, _lxyz, _nx, geom_s, ixs_omg_a, ixs_omg_b );
+					this->comp_ang_max_SemiLocal_b( angular_value, _lxyz, _nx, geom_s, ixs_omg_a, ixs_omg_b );
 					*__p_mx1ang = math::convert_float<T,U>( angular_value );
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-					assert( qu_rad.qu_radial_map::qu_idx() != qu_radial_map::MAP1QU_DAT_INIT_NUM );
+					__ixs_ang_assert__( qu_rad.qu_radial_map::qu_idx() != qu_radial_map::MAP1QU_DAT_INIT_NUM );
 #endif
 					if( angular_value != 0 )
 					{
@@ -645,7 +639,7 @@ template<typename T, typename U> inline void print_ang_max_SemiLocal_mu_sum( con
 }
 
 template<typename T, typename U>
-void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(U & angular_value, _lxyz_struct const & _lxyz, _nx_struct const & _nx, 
+void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal_b(U & angular_value, _lxyz_struct const & _lxyz, _nx_struct const & _nx, 
 		geom_slm<U> & geom_s, ixs_omega<T,U> & ixs_omg_a, ixs_omega<T,U> & ixs_omg_b )
 {
 	static U t1(0), t2(0), t3(0), t2_a(0), t3_a(0), t2_b(0), t3_b(0);
@@ -661,8 +655,8 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(U & angular_value, _lxyz_struc
 	for(int a = 0, ax_a = _lxyz.ax, na_a = _nx.na, it_a = 0; a <= _lxyz.ax && a <= _nx.na; ++a, --ax_a, --na_a)
 	{
 		t2_a = geom_s.CA_x( ax_a );
-		assert( ax_a == _lxyz.ax - a );
-		assert( is_same_float<U>( math::pown<U>( geom_s.CA_x( 1 ), ax_a ), geom_s.CA_x( ax_a ) ) );
+		__ixs_ang_assert__( ax_a == _lxyz.ax - a );
+		__ixs_ang_assert__( is_same_float<U>( math::pown<U>( geom_s.CA_x( 1 ), ax_a ), geom_s.CA_x( ax_a ) ) );
 		t2_a *= math::cnk<u64_t>(_lxyz.ax, ax_a);
 		for(
 			int b = 0, ay_b = _lxyz.ay, c = na_a, az_c = _lxyz.az - na_a;
@@ -676,20 +670,20 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(U & angular_value, _lxyz_struc
 				--it_a;
 				continue;
 			}
-			assert( ay_b == _lxyz.ay - b );
-			assert( az_c == _lxyz.az - c );
-			assert( is_same_float<U>( math::pown<U>( geom_s.CA_y( 1 ), ay_b ), geom_s.CA_y( ay_b ) ) );
-			assert( is_same_float<U>( math::pown<U>( geom_s.CA_z( 1 ), az_c ), geom_s.CA_z( az_c ) ) );
+			__ixs_ang_assert__( ay_b == _lxyz.ay - b );
+			__ixs_ang_assert__( az_c == _lxyz.az - c );
+			__ixs_ang_assert__( is_same_float<U>( math::pown<U>( geom_s.CA_y( 1 ), ay_b ), geom_s.CA_y( ay_b ) ) );
+			__ixs_ang_assert__( is_same_float<U>( math::pown<U>( geom_s.CA_z( 1 ), az_c ), geom_s.CA_z( az_c ) ) );
 			ixs_omg_a.set_abc_i( abc2i( _nx.na, a, b) );
 			a_size = ixs_omg_a.get_omg_size();
 			if( !a_size ) continue;
 			p_omg_a = ixs_omg_a.get_omg_data();
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-			assert( ixs_omg_a.get_omg_data() != 0 );
-			assert( ixs_omg_a.get_omg_l() == _lxyz.l );
-			assert( ixs_omg_a.get_omg_lx() == _nx.na );
-			assert( ixs_omg_a.get_omg_lmb() == _nx.lmbA );
-			assert( ixs_omg_a.get_omg_i_abc() == abc2i(_nx.na, a, b) );
+			__ixs_ang_assert__( ixs_omg_a.get_omg_data() != 0 );
+			__ixs_ang_assert__( ixs_omg_a.get_omg_l() == _lxyz.l );
+			__ixs_ang_assert__( ixs_omg_a.get_omg_lx() == _nx.na );
+			__ixs_ang_assert__( ixs_omg_a.get_omg_lmb() == _nx.lmbA );
+			__ixs_ang_assert__( ixs_omg_a.get_omg_i_abc() == abc2i(_nx.na, a, b) );
 			if( ixs_omg_a.get_omg_i_abc() != abc2i(_nx.na, a, b) && 0 )
 			{
 				this->error("comp_ang_max_SemiLocal", "abc2i error");
@@ -713,8 +707,8 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(U & angular_value, _lxyz_struc
 				t2_b = t3_a;
 				t2_b *= geom_s.CB_x( bx_d );
 				t2_b *= math::cnk<u64_t>(_lxyz.bx, bx_d);
-				assert( bx_d == _lxyz.bx - d );
-				assert( is_same_float<U>( math::pown<U>( geom_s.CB_x( 1 ), bx_d ), geom_s.CB_x( bx_d ) ) );
+				__ixs_ang_assert__( bx_d == _lxyz.bx - d );
+				__ixs_ang_assert__( is_same_float<U>( math::pown<U>( geom_s.CB_x( 1 ), bx_d ), geom_s.CB_x( bx_d ) ) );
 				for(
 					int e = 0, f = nb_d, by_e = _lxyz.by, bz_f = _lxyz.bz - nb_d;
 					e <= nb_d && e <= _lxyz.by;
@@ -725,30 +719,20 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(U & angular_value, _lxyz_struc
 						--it_b;
 						continue;
 					}
-					assert( by_e == _lxyz.by - e );
-					assert( bz_f == _lxyz.bz - f );
-					if( !is_same_float<U>( math::pown<U>( geom_s.CB_y( 1 ), by_e ), geom_s.CB_y( by_e ) ) )
-					{
-						this->error( "comp_ang_max_SemiLocal", "CB_y^(by - e) != geom_s.CB_y(by - e)" );
-						std::cerr << "CB_y = " << geom_s.CB_y(1) << std::endl;
-						std::cerr << "by   = " << _lxyz.by << std::endl;
-						std::cerr << "e    = " << e << std::endl;
-						std::cerr << "by-e = " << by_e << std::endl;
-						std::cerr << "CB_y^( by - e ) = " << math::pown<U>( geom_s.CB_y(1), by_e ) << std::endl;
-						std::cerr << "geom_s.CB_y(by - e) = " << geom_s.CB_y( by_e ) << std::endl;
-					}
-					assert( is_same_float<U>( math::pown<U>( geom_s.CB_y( 1 ), by_e ), geom_s.CB_y( by_e ) ) );
-					assert( is_same_float<U>( math::pown<U>( geom_s.CB_z( 1 ), bz_f ), geom_s.CB_z( bz_f ) ) );
+					__ixs_ang_assert__( by_e == _lxyz.by - e );
+					__ixs_ang_assert__( bz_f == _lxyz.bz - f );
+					__ixs_ang_assert__( is_same_float<U>( math::pown<U>( geom_s.CB_y( 1 ), by_e ), geom_s.CB_y( by_e ) ) );
+					__ixs_ang_assert__( is_same_float<U>( math::pown<U>( geom_s.CB_z( 1 ), bz_f ), geom_s.CB_z( bz_f ) ) );
 					ixs_omg_b.set_abc_i( abc2i( _nx.nb, d, e ) );
 					b_size = ixs_omg_b.get_omg_size();
 					if( !b_size ) continue;
 					p_omg_b = ixs_omg_b.get_omg_data();
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-					assert( ixs_omg_b.get_omg_data() != 0 );
-					assert( ixs_omg_b.get_omg_l() == _lxyz.l );
-					assert( ixs_omg_b.get_omg_lx() == _nx.nb );
-					assert( ixs_omg_b.get_omg_lmb() == _nx.lmbB );
-					assert( ixs_omg_b.get_omg_i_abc() == abc2i(_nx.nb, d, e) );
+					__ixs_ang_assert__( ixs_omg_b.get_omg_data() != 0 );
+					__ixs_ang_assert__( ixs_omg_b.get_omg_l() == _lxyz.l );
+					__ixs_ang_assert__( ixs_omg_b.get_omg_lx() == _nx.nb );
+					__ixs_ang_assert__( ixs_omg_b.get_omg_lmb() == _nx.lmbB );
+					__ixs_ang_assert__( ixs_omg_b.get_omg_i_abc() == abc2i(_nx.nb, d, e) );
 #endif
 
 					t3_b = t2_b;
@@ -760,7 +744,7 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(U & angular_value, _lxyz_struc
 					p_omg_bi = p_omg_b;
 					if( _lxyz.l >= this->ixs_angular_map::l_max() || _lxyz.l < 0 || this->ixs_angular_map::l_max() < 0)
 					{
-						this->error("comp_ang_max_SemiLocal", "last node, l negative ?");
+						this->error("comp_ang_max_SemiLocal_b", "last node, l negative ?");
 						std::cerr << "l : " << _lxyz.l << std::endl;
 						std::cerr << "l_max : " << this->ixs_angular_map::l_max() << std::endl;
 						exit(1);
@@ -925,7 +909,7 @@ void ixs_angular_dat<T,U>::comp_ang_mid( geom_slm<U> & geom_s, qu_radial_map & q
 	{
 		_lxyz.la = la;
 		this->ixs_angular_map::map3node_set_la( la );
-		qu_rad.qu_set_la( la );
+		qu_rad.qu_radial_map::qu_set_la( la );
 		for(int i_la = 0; i_la < ila_size; ++i_la)// ax, ay, az
 		{
 			i2abc( la, ila_size, i_la, _lxyz.ax, _lxyz.ay);
@@ -935,15 +919,15 @@ void ixs_angular_dat<T,U>::comp_ang_mid( geom_slm<U> & geom_s, qu_radial_map & q
 			{
 				_lxyz.lb = lb;
 				this->ixs_angular_map::map3node_set_lb( lb );
-				qu_rad.qu_set_lb( lb );
+				qu_rad.qu_radial_map::qu_set_lb( lb );
 				for(int i_lb = 0; i_lb < ilb_size; ++i_lb )// bx, by, bz
 				{
 					i2abc( lb, ilb_size, i_lb, _lxyz.bx, _lxyz.by);
 					_lxyz.bz = lb - _lxyz.bx - _lxyz.by;
 					this->ixs_angular_map::map3node_set_ib( i_lb );
-					to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
-					to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
-					if( !to_compute_value ) continue;
+					//to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
+					//to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
+					//if( !(to_compute_value) ) continue;
 					// semi-local
 					// when lmb_min = 0 ? -> if l<=lb && l%2 == lb%2
 					for(int l = lb%2; l < this->ixs_angular_map::l_max() && l <= lb; l += 2 )
@@ -953,17 +937,16 @@ void ixs_angular_dat<T,U>::comp_ang_mid( geom_slm<U> & geom_s, qu_radial_map & q
 						this->ixs_angular_map::map3nx2_set_l( l );
 						this->ixs_angular_map::map2lmbA_set_l( l );
 						_lxyz.l = l;
-						qu_rad.qu_set_l( l );
+						qu_rad.qu_radial_map::qu_set_l( l );
 						this->comp_ang_mid_SemiLocal( __p_mx1ang, _lxyz, geom_s, qu_rad, ixs_omg );
 					}
 					// local
 					this->ixs_angular_map::map3node_set_lmax();
 					__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
 					this->ixs_angular_map::map3nx2_set_lmax();
-					qu_rad.qu_set_lmax();
+					qu_rad.qu_radial_map::qu_set_lmax();
 					this->comp_ang_mid_Local( __p_mx1ang, _lxyz, geom_s, qu_rad, ixs_omg );
-					// spin-orbit part TODO
-					// ...
+					// TODO: spin-orbit part
 				}
 			}
 		}
@@ -991,22 +974,22 @@ void ixs_angular_dat<T,U>::comp_ang_mid_Local(pointer __p_mx1ang, _lxyz_struct c
 		ixs_ang.map3nx2_set_nb( _lxyz.lb );
 		__size += ixs_ang.map3nx2();// size += [(na + nb)/2] + 1;
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-		assert( ixs_ang.map3nx2() == (_nx.na_p_nb)/2 + 1 );
+		__ixs_ang_assert__( ixs_ang.map3nx2() == (_nx.na_p_nb)/2 + 1 );
 #endif
 		ixs_omg_x.set_lx( _nx.na_p_nb );
-		qu_rad.qu_set_N( _nx.na_p_nb );
+		qu_rad.qu_radial_map::qu_set_N( _nx.na_p_nb );
 		for(int i_lmb = 0, lmb = _nx.na_p_nb%2; i_lmb < ixs_ang.map3nx2(); ++i_lmb, lmb += 2, ++__p_mx1ang)
 		{
 			_nx.lmbA = lmb;
 			geom_s.slm_kA_set_lx( lmb );
 			ixs_omg_x.set_lambda_i( i_lmb );
-			qu_rad.qu_set_lmb_a( lmb );
-			qu_rad.qu_set_lmb_b( 0 );
+			qu_rad.qu_radial_map::qu_set_lmb_a( lmb );
+			qu_rad.qu_radial_map::qu_set_lmb_b( 0 );
 			// la, (ax,ay,az), lb, (bx,by,bz), l, na, nb
-			this->comp_ang_mid_Local( angular_value, _lxyz, _nx, geom_s, ixs_omg_x );
+			this->comp_ang_mid_Local_b( angular_value, _lxyz, _nx, geom_s, ixs_omg_x );
 			*__p_mx1ang = math::convert_float<T,U>( angular_value );
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-			assert( qu_rad.qu_idx() != qu_radial_map::MAP1QU_DAT_INIT_NUM );
+			__ixs_ang_assert__( qu_rad.qu_idx() != qu_radial_map::MAP1QU_DAT_INIT_NUM );
 #endif
 			if( angular_value != 0 )
 			{
@@ -1048,7 +1031,7 @@ print_ang_mid_Local_sum( const int _it, const int IT_MAX,
 }
 
 template<typename T, typename U>
-void ixs_angular_dat<T,U>::comp_ang_mid_Local(U & angular_value, _lxyz_struct const & _lxyz, _nx_struct const & _nx, 
+void ixs_angular_dat<T,U>::comp_ang_mid_Local_b(U & angular_value, _lxyz_struct const & _lxyz, _nx_struct const & _nx, 
 		geom_slm<U> & geom_s, ixs_omega<T,U> & ixs_omg_x )
 {
 	static U t1(0), t2_a(0), t3_a(0);
@@ -1089,8 +1072,8 @@ void ixs_angular_dat<T,U>::comp_ang_mid_Local(U & angular_value, _lxyz_struct co
 				tmp_t1 = t1;
 #endif
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-				assert( p_omg_x->m == 0 );
-				assert( abs(p_omg_x->mu) <= _nx.lmbA );
+				__ixs_ang_assert__( p_omg_x->m == 0 );
+				__ixs_ang_assert__( abs(p_omg_x->mu) <= _nx.lmbA );
 #endif
 			}
 			t1 *= t3_a;
@@ -1154,15 +1137,15 @@ void ixs_angular_dat<T,U>::comp_ang_mid_SemiLocal(pointer __p_mx1ang, _lxyz_stru
 
 		__size += ixs_ang.map3nx2();// size += lmb_a_size * lmb_b_size
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-		assert( ixs_ang.map3nx2() == ixs_ang.map2lmbA_size() );
+		__ixs_ang_assert__( ixs_ang.map3nx2() == ixs_ang.map2lmbA_size() );
 #endif
-		qu_rad.qu_set_N( _nx.na_p_nb );
+		qu_rad.qu_radial_map::qu_set_N( _nx.na_p_nb );
 		for(int i_lmb_a = 0, lmb_a = ixs_ang.map2lmbA_min(); i_lmb_a < ixs_ang.map2lmbA_size(); ++i_lmb_a, lmb_a += 2, ++__p_mx1ang)
 		{
 			geom_s.slm_kA_set_lx( lmb_a );
 			ixs_omg_a.set_lambda_i( i_lmb_a );
-			qu_rad.qu_set_lmb_a( lmb_a );
-			qu_rad.qu_set_lmb_b( 0 );
+			qu_rad.qu_radial_map::qu_set_lmb_a( lmb_a );
+			qu_rad.qu_radial_map::qu_set_lmb_b( 0 );
 			_nx.lmbA = lmb_a;
 			// la, (ax,ay,az), lb, (bx,by,bz), l, na, nb
 			if( ixs_omg_b.get_omg_size() == 0 )
@@ -1170,10 +1153,10 @@ void ixs_angular_dat<T,U>::comp_ang_mid_SemiLocal(pointer __p_mx1ang, _lxyz_stru
 				*__p_mx1ang = 0;
 				continue;
 			}
-			this->comp_ang_mid_SemiLocal( angular_value, _lxyz, _nx, geom_s, ixs_omg_a, ixs_omg_b );
+			this->comp_ang_mid_SemiLocal_b( angular_value, _lxyz, _nx, geom_s, ixs_omg_a, ixs_omg_b );
 			*__p_mx1ang = math::convert_float<T,U>( angular_value );
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-			assert( qu_rad.qu_idx() != qu_radial_map::MAP1QU_DAT_INIT_NUM );
+			__ixs_ang_assert__( qu_rad.qu_idx() != qu_radial_map::MAP1QU_DAT_INIT_NUM );
 #endif
 			if( angular_value != 0 )
 			{
@@ -1201,7 +1184,7 @@ void ixs_angular_dat<T,U>::comp_ang_mid_SemiLocal(pointer __p_mx1ang, _lxyz_stru
 }
 
 template<typename T, typename U>
-void ixs_angular_dat<T,U>::comp_ang_mid_SemiLocal(U & angular_value, _lxyz_struct const & _lxyz, _nx_struct const & _nx, 
+void ixs_angular_dat<T,U>::comp_ang_mid_SemiLocal_b(U & angular_value, _lxyz_struct const & _lxyz, _nx_struct const & _nx, 
 		geom_slm<U> & geom_s, ixs_omega<T,U> & ixs_omg_a, ixs_omega<T,U> & ixs_omg_b )
 {
 	static U t1(0), t2(0), t3(0), t2_a(0), t3_a(0);
@@ -1259,7 +1242,7 @@ void ixs_angular_dat<T,U>::comp_ang_mid_SemiLocal(U & angular_value, _lxyz_struc
 				for(; p_omg_bi->m == m && it_ob < b_size; ++it_ob, ++p_omg_bi)
 				{
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-					assert( p_omg_bi->mu == 0 );
+					__ixs_ang_assert__( p_omg_bi->mu == 0 );
 #endif
 					t3 += p_omg_bi->d;
 #if defined( __IXS_ANGULAR_DATA_PRINT )
@@ -1344,7 +1327,7 @@ void ixs_angular_dat<T,U>::comp_ang_min( ixs_omega<T,U> const & ixs_omg )
 						this->ixs_angular_map::map3node_set_l( l );
 						__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-						assert( this->ixs_angular_map::map3node_size() == 1 );
+						__ixs_ang_assert__( this->ixs_angular_map::map3node_size() == 1 );
 #endif
 						this->ixs_angular_map::map3nx2_set_l( l );
 						this->ixs_angular_map::map2lmbA_set_l( l );
@@ -1397,16 +1380,16 @@ void ixs_angular_dat<T,U>::comp_ang_min_SemiLocal(pointer __p_mx1ang, _lxyz_stru
 		{
 			t2 += p_omg_ai->d;
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-			assert( p_omg_ai->mu == 0 );
-			assert( p_omg_ai->lmb == 0 );
+			__ixs_ang_assert__( p_omg_ai->mu == 0 );
+			__ixs_ang_assert__( p_omg_ai->lmb == 0 );
 #endif
 		}
 		t3 = 0;
 		for(; p_omg_bi->m == m && it_ob < b_size; ++it_ob, ++p_omg_bi)
 		{
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
-			assert( p_omg_bi->mu == 0 );
-			assert( p_omg_bi->lmb == 0 );
+			__ixs_ang_assert__( p_omg_bi->mu == 0 );
+			__ixs_ang_assert__( p_omg_bi->lmb == 0 );
 #endif
 			t3 += p_omg_bi->d;
 		}

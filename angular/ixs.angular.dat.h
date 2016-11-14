@@ -13,17 +13,17 @@
 #include"qu.radial.mem.h"
 #include"qu.radial.dat.h"
 
-#define __IXS_ANGULAR_DATA_PRINT
-#define __IXS_ANGULAR_DATA_PRINT_DETAIL
+//#define __IXS_ANGULAR_DATA_PRINT
+//#define __IXS_ANGULAR_DATA_PRINT_DETAIL
 #define __IXS_ANGULAR_DATA_SIZECHECK
 //#define __IXS_ANGULAR_DATA_RADIALCHECK
 
 #define __IXS_ANGULAR_DATA_DEBUG
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
   #include<cassert>
-  #define __ixs_dat_assert__( arg ) assert( (arg) )
+  #define __ixs_ang_assert__( arg ) assert( (arg) )
 #else
-  #define __ixs_dat_assert__( arg )
+  #define __ixs_ang_assert__( arg )
 #endif
 
 
@@ -77,12 +77,12 @@ public:
 	// max SemiLocal
 	void comp_ang_max_SemiLocal( pointer __p_mx1ang, _lxyz_struct const & _lxyz, geom_slm<U> & geom_s, qu_radial_dat<T,U> & qu_rad,
 			ixs_omega<T,U> const & ixs_omg );
-	void comp_ang_max_SemiLocal( U & value, _lxyz_struct const & _lxyz, _nx_struct const & _nx,
+	void comp_ang_max_SemiLocal_b( U & value, _lxyz_struct const & _lxyz, _nx_struct const & _nx,
 			geom_slm<U> & geom_s, ixs_omega<T,U> & ixs_omg_a, ixs_omega<T,U> & ixs_omg_b );
 	// max Local
 	void comp_ang_max_Local( pointer __p_mx1ang, _lxyz_struct const & _lxyz,
 			geom_slm<U> & geom_s, alpha_slm<T,U> & alp_s, qu_radial_dat<T,U> & qu_rad, ixs_omega<T,U> const & ixs_omg );
-	void comp_ang_max_Local( U & value, _lxyz_struct const & _lxyz, _nx_struct const & _nx,
+	void comp_ang_max_Local_b( U & value, _lxyz_struct const & _lxyz, _nx_struct const & _nx,
 			geom_slm<U> & geom_s, alpha_slm<T,U> & alp_s, ixs_omega<T,U> & ixs_omg_x );
 
 	// A != C == B  <==> mid
@@ -90,12 +90,12 @@ public:
 	// mid SemiLocal
 	void comp_ang_mid_SemiLocal( pointer __p_mx1ang, _lxyz_struct const & _lxyz, geom_slm<U> & geom_s, qu_radial_map & qu_rad, 
 			ixs_omega<T,U> const & ixs_omg );
-	void comp_ang_mid_SemiLocal( U & value, _lxyz_struct const & _lxyz, _nx_struct const & _nx,
+	void comp_ang_mid_SemiLocal_b( U & value, _lxyz_struct const & _lxyz, _nx_struct const & _nx,
 			geom_slm<U> & geom_s, ixs_omega<T,U> & ixs_omg_a, ixs_omega<T,U> & ixs_omg_b );
 	// mid Local
 	void comp_ang_mid_Local( pointer __p_mx1ang, _lxyz_struct const & _lxyz, geom_slm<U> & geom_s, qu_radial_map & qu_rad, 
 			ixs_omega<T,U> const & ixs_omg );
-	void comp_ang_mid_Local( U & value, _lxyz_struct const & _lxyz, _nx_struct const & _nx, geom_slm<U> & geom_s, ixs_omega<T,U> & ixs_omg_x );
+	void comp_ang_mid_Local_b( U & value, _lxyz_struct const & _lxyz, _nx_struct const & _nx, geom_slm<U> & geom_s, ixs_omega<T,U> & ixs_omg_x );
 
 	// A == C == B  <==> min
 	void comp_ang_min( ixs_omega<T,U> const & ixs_omg );
@@ -104,17 +104,17 @@ public:
 	// mid Local (not needed)
 	// ...
 
-	inline pointer M_mx1ang_data(){__ixs_dat_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->data();}
-	inline const_pointer M_mx1ang_data()const{__ixs_dat_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->data();}
-	inline pointer M_mx1ang_data(int i){__ixs_dat_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->data(i);}
-	inline const_pointer M_mx1ang_data(int i)const{__ixs_dat_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->data(i);}
-	inline size_type const & M_mx1ang_size()const{__ixs_dat_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->size();}
+	inline pointer M_mx1ang_data(){__ixs_ang_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->data();}
+	inline const_pointer M_mx1ang_data()const{__ixs_ang_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->data();}
+	inline pointer M_mx1ang_data(int i){__ixs_ang_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->data(i);}
+	inline const_pointer M_mx1ang_data(int i)const{__ixs_ang_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->data(i);}
+	inline size_type const & M_mx1ang_size()const{__ixs_ang_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->size();}
 
 	inline void mx1ang_set_it(){ this->_mx1ang_it = this->M_mx1ang_data() + this->ixs_angular_map::map3node_pos(); }
-	inline pointer mx1ang_data(){ __ixs_dat_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it; }
-	inline const_pointer mx1ang_data()const{ __ixs_dat_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it; }
-	inline reference mx1ang( int i ){ __ixs_dat_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it[i]; }
-	inline const_reference mx1ang( int i )const{ __ixs_dat_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it[i]; }
+	inline pointer mx1ang_data(){ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it; }
+	inline const_pointer mx1ang_data()const{ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it; }
+	inline reference mx1ang( int i ){ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it[i]; }
+	inline const_reference mx1ang( int i )const{ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it[i]; }
 };
 
 #endif//__IXS_ANGULAR_DATA_H__
