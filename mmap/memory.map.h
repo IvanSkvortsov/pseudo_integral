@@ -50,6 +50,7 @@ public:
 	int create(char const * file, const off_t __size, int __flags = O_RDWR|O_CREAT|O_TRUNC, mode_t __mode = S_IRUSR |S_IWUSR |S_IRGRP |S_IROTH);
 	int open(char const * file, int __flags = O_RDONLY, mode_t __mode = S_IRUSR | S_IRGRP | S_IROTH);
 	int close();
+	void info()const;
 private:
 	void zeroize();
 	int file_open(char const * file, int __flags, mode_t __mode);

@@ -144,3 +144,14 @@ int memory_map::file_open(char const * file, int __flags, mode_t __mode)
 	this->_size = _stat.st_size;// get file size (in bytes)
 	return 0;
 }
+
+void memory_map::info()const
+{
+	char inf_logo[64];
+	snprintf( inf_logo, 256, "INF: [%p] memory_map::", this );
+	fprintf( stdout, "%s%4s: %zu\n", inf_logo, "size", this->size() );
+	fprintf( stdout, "%s%4s: [%p]\n", inf_logo, "data", this->data() );
+	fprintf( stdout, "%s%4s: %d\n", inf_logo, "fd", this->_fd );
+	fprintf( stdout, "%s%4s: %d\n", inf_logo, "flag", this->_flags );
+	fprintf( stdout, "%s%4s: %d%d%d\n", inf_logo, "mode", this->_mode&0700, this->_mode&070, this->_mode&07 );
+}
