@@ -70,6 +70,7 @@ spherical.harmonics.h
 strlib
 xyz.p.integral.h
 xyz.spherical.h
+macro.loop.h
 # alpha/
 alpha/*.siz.*
 # omega
