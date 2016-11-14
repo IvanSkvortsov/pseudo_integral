@@ -4,7 +4,7 @@
 #define __VECTOR_3D__INLINE
 //#define __VECTOR_3D__INLINE inline
 
-#define __VECTOR_3D_LOG
+//#define __VECTOR_3D_LOG
 
 template<typename T>
 struct vector_3d
