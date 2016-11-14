@@ -6,6 +6,8 @@
 #include"vector.3d.h"
 #include"mpreal.h"
 #include"ixs.angular.idx.h"
+#include"pseudo.task.01.read.h"
+#include"pseudo.task.01.write.h"
 
 using namespace std;
 
@@ -20,18 +22,44 @@ using namespace std;
 // 8. angular dat file
 // 9. qu radial data file
 template<typename T, typename U>
-int demo_pseudo( char const * file )
+int demo_pseudo( char const * file, const int task_num = 1 )
 {
 	pseudo_struct<T,U> pseud;
+	_3_centers<T> _geoms;
+	_3_alphas<T> _alps;
+	_3_momenta _angs;
+	if( task_num == 1 )
+	{
+		const char file_task_01[] = "file.inp";
+		ifstream inp( file_task_01 );
+		if( !inp.is_open() )
+		{
+			cerr << "Error: [demo_pseudo] can't open file '" << file_task_01 << "'" << endl;
+			return 1;
+		}
+		_geoms.read( inp );
+		_alps.read( inp );
+		_angs.read( inp );
+		inp.close();
+		const char file_basis[] = "basis.txt";
+		const char file_geom[] = "geom.txt";
+		const char file_ecp[] = "ecp.txt";
+		pseudo_task_01_write_geom<T>( file_geom, _geoms );
+		pseudo_task_01_write_basis<T>( file_basis, _alps, _angs );
+		pseudo_task_01_write_ecp<T>( file_ecp, _alps, _angs );
+	}
 	pseud.run_pseudo( file );
 	pseud.comp_pseudo();
 	pseud.qu_dat.test_print( std::clog );
 
+	if( !(pseud.to_flip() && pseud.is_mapping_mid()) )
+		_angs.flip();
+
 	pseudo_index idx;
-	idx.set_la( to_compute::get_la() );
-	idx.set_axyz( to_compute::get_ax(), to_compute::get_ay(), to_compute::get_az() );
-	idx.set_lb( to_compute::get_lb() );
-	idx.set_bxyz( to_compute::get_bx(), to_compute::get_by(), to_compute::get_bz() );
+	idx.set_la( _angs.la );
+	idx.set_axyz( _angs.ax[0], _angs.ax[1], _angs.ax[2] );
+	idx.set_lb( _angs.lb );
+	idx.set_bxyz( _angs.bx[0], _angs.bx[1], _angs.bx[2] );
 	const int * ax = idx.ax;
 	const int * bx = idx.bx;
 	pseud.print_cx();

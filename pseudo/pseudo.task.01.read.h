@@ -10,6 +10,7 @@ struct _3_centers
 	void read_a( std::istream & inp );
 	void read_b( std::istream & inp );
 	void read_c( std::istream & inp );
+	void read( std::istream & inp );
 };
 
 template<typename T>
@@ -20,6 +21,7 @@ struct _3_alphas
 	void read_a( std::istream & inp );
 	void read_b( std::istream & inp );
 	void read_c( std::istream & inp );
+	void read( std::istream & inp );
 };
 
 struct _3_momenta

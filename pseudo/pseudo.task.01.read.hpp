@@ -10,11 +10,23 @@ template<typename T> void _3_centers<T>::read( std::istream & inp, T * r )
 template<typename T> void _3_centers<T>::read_a( std::istream & inp ){ _3_centers<T>::read( inp, this->A ); }
 template<typename T> void _3_centers<T>::read_b( std::istream & inp ){ _3_centers<T>::read( inp, this->B ); }
 template<typename T> void _3_centers<T>::read_c( std::istream & inp ){ _3_centers<T>::read( inp, this->C ); }
+template<typename T> void _3_centers<T>::read( std::istream & inp )
+{
+	this->read_a( inp );
+	this->read_b( inp );
+	this->read_c( inp );
+}
 
 template<typename T> void _3_alphas<T>::read( std::istream & inp, T & alp ){ inp >> alp; }
 template<typename T> void _3_alphas<T>::read_a( std::istream & inp ){ _3_alphas<T>::read( inp, this->alp_a ); }
 template<typename T> void _3_alphas<T>::read_b( std::istream & inp ){ _3_alphas<T>::read( inp, this->alp_b ); }
 template<typename T> void _3_alphas<T>::read_c( std::istream & inp ){ _3_alphas<T>::read( inp, this->alp_c ); }
+template<typename T> void _3_alphas<T>::read( std::istream & inp )
+{
+	this->read_a( inp );
+	this->read_b( inp );
+	this->read_c( inp );
+}
 
 void _3_momenta::read_xyz( std::istream & inp, int & _lx_, int * _x_)
 {

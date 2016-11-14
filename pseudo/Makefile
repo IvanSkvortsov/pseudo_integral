@@ -1,7 +1,7 @@
 CXX=g++ -std=c++11
 CXXFLAGS=-I .. -I ../alpha -I ../angular -I ../array -I ../basis -I ../math -I ../matrix -I ../memorystream -I ../mmap -I ../omega -I ../poly_n \
 	 -I ../vector_3d_ -I ../xyz_pown_integral -I ../radial -I ../hyperg
-libraries=-L../hyperg -lhyperg -L ../math -lmath -lgmp -lmpfr
+libraries=-L. -ltask01 -L../hyperg -lhyperg -L ../math -lmath -lgmp -lmpfr
 
 alpha_obj=../alpha/alpha.map.o ../alpha/alpha.val.o ../alpha/alpha.pow.o ../alpha/alpha.slm.o ../alpha/alpha.mem.o
 angular_obj=../angular/ixs.angular.map.o ../angular/ixs.angular.dat.o ../angular/geom.slm.o ../angular/ixs.angular.idx.o
@@ -21,6 +21,7 @@ matrix_h=../matrix/matrix.cursor.h ../matrix/size.struct.h ../matrix/data.struct
 math_lib=../math/libmath.a
 hyperg_lib=../hyperg/libhyperg.a
 pseudo_obj=pseudo.integral.o pseudo.integral.mem.o
+task01_obj=pseudo.task.01.read.o pseudo.task.01.write.o
 .PHONY: clean, all_glob, vec3d, math, xpni, poly, mems, omgi, alp, hypg, radi, angi
 
 vec3: 
@@ -86,7 +87,7 @@ remake_all:
 	cd ../angular;            make clean; make all;
 	make pseudo.struct.exe
 
-pseudo.struct.exe: pseudo.struct.h pseudo.struct.demo.h pseudo.struct.main.cpp $(objects) $(pseudo_obj)
+pseudo.struct.exe: pseudo.struct.h pseudo.struct.demo.h pseudo.struct.main.cpp $(objects) $(pseudo_obj) $(task01_obj)
 	$(CXX) $(CXXFLAGS) -o $@ pseudo.struct.main.cpp $(objects) $(pseudo_obj) $(libraries)
 
 pseudo.integral.o: pseudo.integral.h pseudo.integral.hpp pseudo.integral.cpp
@@ -103,6 +104,9 @@ pseudo.task.01.read.o: pseudo.task.01.read.h pseudo.task.01.read.hpp pseudo.task
 
 pseudo.task.01.exe: pseudo.task.01.demo.h pseudo.task.01.read.o pseudo.task.01.write.o
 	$(CXX) -I .. -std=c++11 -o $@ pseudo.task.01.main.cpp pseudo.task.01.read.o pseudo.task.01.write.o -lgmp -lmpfr
+
+libtask01.a: pseudo.task.01.read.o pseudo.task.01.write.o
+	ar cr $@ pseudo.task.01.read.o pseudo.task.01.write.o
 
 libpseudo.a: $(pseudo_obj)
 	ar cr $@ $(pseudo_obj)

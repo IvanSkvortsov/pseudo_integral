@@ -29,6 +29,7 @@ template<typename T> static void write_basis_set_lx( std::ostream & out, T const
 	out << std::setw(4) << 1 << std::setw(4) << 1 << std::endl;// 1 - number of alphas, 1 - number of functions
 	out << std::setw(w) << alp_x << std::endl;
 	out << std::setw(6) << 1 << std::setw(4) << 0 << std::endl;// 1 - number of primitives in function; 0 - starting index of alpha array
+	out << std::setw(w) << T(1) << std::endl;
 }
 template<typename T> static void write_basis_set( std::ostream & out, T const & alp_x, const int lx_max, const int w = 25 )
 {
