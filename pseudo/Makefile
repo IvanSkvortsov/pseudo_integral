@@ -95,6 +95,15 @@ pseudo.integral.o: pseudo.integral.h pseudo.integral.hpp pseudo.integral.cpp
 pseudo.integral.mem.o: pseudo.integral.mem.h pseudo.integral.mem.hpp pseudo.integral.mem.cpp pseudo.integral.o
 	$(CXX) $(CXXFLAGS) -c -o $@ pseudo.integral.mem.cpp
 
+pseudo.task.01.write.o: pseudo.task.01.write.h pseudo.task.01.write.hpp pseudo.task.01.write.cpp
+	$(CXX) -I .. -std=c++11 -c -o $@ pseudo.task.01.write.cpp
+
+pseudo.task.01.read.o: pseudo.task.01.read.h pseudo.task.01.read.hpp pseudo.task.01.read.cpp
+	$(CXX) -I .. -std=c++11 -c -o $@ pseudo.task.01.read.cpp
+
+pseudo.task.01.exe: pseudo.task.01.demo.h pseudo.task.01.read.o pseudo.task.01.write.o
+	$(CXX) -I .. -std=c++11 -o $@ pseudo.task.01.main.cpp pseudo.task.01.read.o pseudo.task.01.write.o -lgmp -lmpfr
+
 libpseudo.a: $(pseudo_obj)
 	ar cr $@ $(pseudo_obj)
 
