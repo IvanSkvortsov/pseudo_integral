@@ -13,10 +13,11 @@
 #include"qu.radial.mem.h"
 #include"qu.radial.dat.h"
 
-//#define __IXS_ANGULAR_DATA_PRINT
-//#define __IXS_ANGULAR_DATA_PRINT_DETAIL
+#define __IXS_ANGULAR_DATA_PRINT
+#define __IXS_ANGULAR_DATA_PRINT_DETAIL
 #define __IXS_ANGULAR_DATA_SIZECHECK
 //#define __IXS_ANGULAR_DATA_RADIALCHECK
+#define __IXS_ANGULAR_DATA_TEST
 
 #define __IXS_ANGULAR_DATA_DEBUG
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
@@ -115,6 +116,24 @@ public:
 	inline const_pointer mx1ang_data()const{ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it; }
 	inline reference mx1ang( int i ){ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it[i]; }
 	inline const_reference mx1ang( int i )const{ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it[i]; }
+
+#ifdef  __IXS_ANGULAR_DATA_TEST
+	void test_print( T const & value, _lxyz_struct const & _lxyz, _nx_struct const & _nx )const;
+
+	void test_ang_max( alpha_map & alp_s );
+	void test_ang_max_SemiLocal( T const * __p_mx1ang, _lxyz_struct const & _lxyz );
+	void test_ang_max_Local( T const * __p_mx1ang, _lxyz_struct const & _lxyz );
+
+	void test_ang_mid();
+	void test_ang_mid_SemiLocal( T const * __p_mx1ang, _lxyz_struct const & _lxyz );
+	void test_ang_mid_Local( T const * __p_mx1ang, _lxyz_struct const & _lxyz );
+
+	void test_ang_min(){}
+#else
+	void test_ang_max( alpha_map & alp_s ){}
+	void test_ang_mid(){}
+	void test_ang_min(){}
+#endif
 };
 
 #endif//__IXS_ANGULAR_DATA_H__

@@ -7,12 +7,14 @@
   #define to_compute_set_b_xyz( bx ) to_compute::set_b_xyz( bx )
   #define to_compute_set_a( la, ax, ay, az ) to_compute::set_a( la, ax, ay, az )
   #define to_compute_set_b( lb, bx, by, bz ) to_compute::set_b( lb, bx, by, bz )
+  #define to_compute_flip to_compute::flip()
   #define to_compute_value to_compute::value
 #else
   #define to_compute_set_a_xyz( ax )
   #define to_compute_set_b_xyz( bx )
   #define to_compute_set_a( la, ax, ay, az )
   #define to_compute_set_b( lb, bx, by, bz )
+  #define to_compute_flip
   #define to_compute_value true
 #endif
 
@@ -73,6 +75,13 @@ struct to_compute
 		value = ( value && (bx == to_compute::__bx__));
 		value = ( value && (by == to_compute::__by__));
 		value = ( value && (bz == to_compute::__bz__));
+	}
+	static void flip()
+	{
+		const int _ax_[3] = {to_compute::get_ax(), to_compute::get_ay(), to_compute::get_az()};
+		const int _bx_[3] = {to_compute::get_bx(), to_compute::get_by(), to_compute::get_bz()};
+		to_compute::set_a_xyz( _bx_ );
+		to_compute::set_b_xyz( _ax_ );
 	}
 };
 
