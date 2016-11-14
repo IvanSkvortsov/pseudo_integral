@@ -64,8 +64,9 @@ template<typename T> void pseudo_task_01_write_ecp( const char * file, _3_alphas
 	out << "ECP 46" << std::setw(4) << l_max << std::setw(4) << lso_max << std::endl;
 	for(int l = 0; l <= l_max; ++l )
 	{
-		out << std::setw(3) << 1 << std::setw(3) << 1 << std::setw(3) << angs.nk <<
-			std::setw( w ) << alps.alp_c << std::setw(1) << T(1) << std::endl;// 1 - number of functions; 1 - number of primitives in func;
+		out << std::setw(3) << 1 << std::setw(3) << 1 << ' ' << std::setw(3) << angs.nk << ' ' <<
+			std::setw( w ) << alps.alp_c << ' ' << std::setw(w) << T(1) << std::endl;
+		// 1 - number of functions; 1 - number of primitives in func;
 	}
 
 	out.close();

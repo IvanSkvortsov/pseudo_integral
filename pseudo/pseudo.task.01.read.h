@@ -11,6 +11,8 @@ struct _3_centers
 	void read_b( std::istream & inp );
 	void read_c( std::istream & inp );
 	void read( std::istream & inp );
+	void print( std::ostream & out, const int w = 25 )const;
+	void flip();
 };
 
 template<typename T>
@@ -22,6 +24,8 @@ struct _3_alphas
 	void read_b( std::istream & inp );
 	void read_c( std::istream & inp );
 	void read( std::istream & inp );
+	void print( std::ostream & out, const int w = 25 )const;
+	void flip();
 };
 
 struct _3_momenta
@@ -32,6 +36,7 @@ struct _3_momenta
 	static int n2;
 	static void read_xyz( std::istream & inp, int & _lx_, int * _x_ );
 	void read( std::istream & inp );
+	void print( std::ostream & out )const;
 	void flip();
 };
 
