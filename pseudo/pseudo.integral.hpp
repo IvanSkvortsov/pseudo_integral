@@ -1010,7 +1010,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 	{
 		this->prim_set_ia( ia );// <- %map1A_set_ix( ia )
 		qu_rad.qu_dat_set_ia( ia );
-		this->mx1kA_set_idx();// TODO: remove
+		//this->mx1kA_set_idx();// TODO: remove
 		for(int ib = 0; ib < this->alpha_map::map1B_size(); ++ib )
 		{
 			this->prim_set_ib( ib );// <- %map1B_set_ix( ib )
@@ -1058,15 +1058,15 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 			qu_rad.qu_radial_map::qu_set_lmb_a( lmb );
 			qu_rad.qu_radial_map::qu_set_lmb_b( 0 );
 			qu_rad.qu_dat_set_id( qu_rad.qu_radial_map::qu_idx() );
-			this->mx1A_set_idx();
-			this->mx1B_set_idx();
-			this->mx1C_set_idx();
-			T _alp = this->mx1A();
-			_alp  += this->mx1B();
-			_alp  += this->mx1C();
-			T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
-			psi_value += q_int * *__p_mx1ang;
-			//psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
+			//this->mx1A_set_idx();
+			//this->mx1B_set_idx();
+			//this->mx1C_set_idx();
+			//T _alp = this->mx1A();
+			//_alp  += this->mx1B();
+			//_alp  += this->mx1C();
+			//T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
+			//psi_value += q_int * *__p_mx1ang;
+			psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
 #ifdef  __PSEUDO_INTEGRAL_COMP_PRIM_PRINT
 		to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
 		to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
@@ -1082,7 +1082,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 				std::setw(6) << "N" << std::setw(3) << "na" << std::setw(4) << "lmb" <<
 				std::setw(25) << "angular" <<
 				std::setw(25) << "radial" <<
-				std::setw(25) << "q_int" <<
+				//std::setw(25) << "q_int" <<
 				std::setw(25) << "pseudo" <<
 				std::endl;
 			std::clog <<
@@ -1092,7 +1092,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 				std::setw(6) << N << std::setw(3) << na << std::setw(4) << lmb <<
 				std::setw(25) << std::setprecision(15) << std::scientific << *__p_mx1ang <<
 				std::setw(25) << std::setprecision(15) << std::scientific << qu_rad.qu_dat_value() <<
-				std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
+				//std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
 				std::setw(25) << std::setprecision(15) << std::scientific << psi_value <<
 				std::endl;
 			++iter;
@@ -1109,7 +1109,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local(
 	for(int ia = 0; ia < this->alpha_map::map1A_size(); ++ia )
 	{
 		this->prim_set_ia( ia );// <- %map1A_set_ix( ia )
-		this->mx1kA_set_idx();// TODO: remove
+		//this->mx1kA_set_idx();// TODO: remove
 		qu_rad.qu_dat_set_ia( ia );
 		for(int ib = 0; ib < this->alpha_map::map1B_size(); ++ib )
 		{
@@ -1162,15 +1162,15 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local_
 			qu_rad.qu_radial_map::qu_set_lmb_a( lmb );
 			qu_rad.qu_radial_map::qu_set_lmb_b( 0 );
 			qu_rad.qu_dat_set_id( qu_rad.qu_radial_map::qu_idx() );
-			this->mx1A_set_idx();
-			this->mx1B_set_idx();
-			this->mx1C_set_idx();
-			T _alp = this->mx1A(); 
-			_alp  += this->mx1B(); 
-			_alp  += this->mx1C(); 
-			T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
-			psi_value += q_int * *__p_mx1ang;
-			//psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
+			//this->mx1A_set_idx();
+			//this->mx1B_set_idx();
+			//this->mx1C_set_idx();
+			//T _alp = this->mx1A(); 
+			//_alp  += this->mx1B(); 
+			//_alp  += this->mx1C(); 
+			//T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
+			//psi_value += q_int * *__p_mx1ang;
+			psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
 #ifdef  __PSEUDO_INTEGRAL_COMP_PRIM_PRINT
 		if( to_compute_value )
 		{
@@ -1184,7 +1184,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local_
 				std::setw(6) << "N" << std::setw(3) << "na" << std::setw(4) << "lmb" <<
 				std::setw(25) << "angular" <<
 				std::setw(25) << "radial" <<
-				std::setw(25) << "q_int" <<
+				//std::setw(25) << "q_int" <<
 				std::setw(25) << "pseudo" <<
 				std::endl;
 			std::clog <<
@@ -1194,7 +1194,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local_
 				std::setw(6) << N << std::setw(3) << na << std::setw(4) << lmb <<
 				std::setw(25) << std::setprecision(15) << std::scientific << *__p_mx1ang <<
 				std::setw(25) << std::setprecision(15) << std::scientific << qu_rad.qu_dat_value() <<
-				std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
+				//std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
 				std::setw(25) << std::setprecision(15) << std::scientific << psi_value <<
 				std::endl;
 			++iter;
@@ -1341,6 +1341,8 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_min( const
 				nk = this->alpha_val<T,U>::mx1C_nk() + __QU_RADIAL_DAT_R_POWN;// __QU_RADIAL_DAT_R_POWN = 2, or 0
 				this->prim_value() = pseudo_gamma<T>( lsum + nk, _alp );
 				this->prim_value() *= ixs_ang_value;
+				this->prim_value() *= 4;
+				this->prim_value() *= math::numeric_constants<T>::pi;
 			}
 		}
 	}
