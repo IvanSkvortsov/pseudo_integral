@@ -41,6 +41,14 @@ template<typename T, typename U> void qu_radial_dat<T,U>::memory_create( const c
 	}
 	this->sync_stream();
 	this->write_dat();
+	if( __size != this->tell() )
+	{
+		std::cerr << "memory_stream::data: [" << (void *)(this->memorystream::getbuf()) << "]" << std::endl;
+		std::cerr << "memory_stream::size: " << this->memorystream::tell() << std::endl;
+		std::cerr << "memory_map::data: [" << this->memory_map::data() << "]" << std::endl;
+		std::cerr << "memory_map::size: " << this->memory_map::size() << std::endl;
+		//this->memory_map::info();
+	}
 	__qu_dat_assert__( __size == this->tell() );
 }
 
@@ -115,7 +123,7 @@ template<typename T, typename U> void qu_radial_dat<T,U>::write_dat()
 	__cnvrt._void = ms.getcur();
 	this->_M_map3qu = __cnvrt._map3q;
 	this->_M_map3qu->n() = this->M_get_la_max() + 1;
-	this->_M_map3qu->m() = this->M_get_la_max() + 1;
+	this->_M_map3qu->m() = this->M_get_lb_max() + 1;
 	this->_M_map3qu->p() = this->M_get_l_max() + this->M_get_lso_max() + 1;
 	this->_M_map3qu->init_size();
 	ms.seek( sizeof(size_struct<3>) + this->_M_map3qu->size() * sizeof(map3qu_type), seek_dir::cur );
@@ -760,9 +768,9 @@ void qu_radial_dat<T,U>::comp_qu_mid_Local_b( _lx_struct const& _lx, qu_hyperg_1
 				_alp  += this->mx1B();
 				_alp  += this->mx1C();
 				//T q_int = q_int_1f1<T>( Nk, lmb, this->mx1kA(), _alp );
-				this->qu_dat_value() *= this->alpha_val<T,U>::mx2AB_exp();// exp( -alpA * |CA|^2 - alpB * |CB|^2 )
-				this->qu_dat_value() *= 4;
-				this->qu_dat_value() *= math::numeric_constants<T>::pi;
+				//this->qu_dat_value() *= this->alpha_val<T,U>::mx2AB_exp();// exp( -alpA * |CA|^2 - alpB * |CB|^2 )
+				//this->qu_dat_value() *= 4;
+				//this->qu_dat_value() *= math::numeric_constants<T>::pi;
 				this->qu_set_done();
 #ifdef  __QU_RADIAL_DAT_PRINT
 				if( _it++ < IT_MAX )
@@ -918,8 +926,8 @@ void qu_radial_dat<T,U>::comp_qu_mid_SemiLocal_b( _lx_struct const& _lx, qu_hype
 				this->qu_dat_value() *= qu.coef;
 				this->qu_dat_value() *= qu.coef_g;
 				//this->qu_dat_value() *= this->alpha_val<T,U>::mx2AB_exp();// exp( -alpA * |CA|^2 - alpB * |CB|^2 )
-				this->qu_dat_value() *= 4;
-				this->qu_dat_value() *= math::numeric_constants<T>::pi;
+				//this->qu_dat_value() *= 4;
+				//this->qu_dat_value() *= math::numeric_constants<T>::pi;
 				this->qu_set_done();
 #ifdef  __QU_RADIAL_DAT_PRINT
 				if( _it++ < IT_MAX )
