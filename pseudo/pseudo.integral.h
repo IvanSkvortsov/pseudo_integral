@@ -60,8 +60,8 @@ inline pointer M_mx1##X##_data()\
 	__pseudo_assert__( this->_M_mx1##X != 0 );\
 	return this->_M_mx1##X->data();\
 }\
-/* mx1prim_set_l(), map3node_prim_pos(), ...*/\
-inline void mx1##X##_set_l()\
+/* mx1prim_set_it(), map3node_prim_pos(), ...*/\
+inline void mx1##X##_set_it()\
 {\
 	__pseudo_assert__( this->_map3node_it_l != 0 );\
 	this->_mx1##X##_it  = this->M_mx1##X##_data() + this->map3node_##X##_pos();\
@@ -100,20 +100,20 @@ inline int const & map3node_##X##_size()const\
 inline void X##_set_la( const int la )\
 {\
 	this->alpha_map::map1A##_set_lx( la );\
-	this->alpha_map::map3ABC##_set_la( la );\
+	/*this->alpha_map::map3ABC##_set_la( la );*/\
 }\
 inline void X##_set_axyz( const int i ){ this->map3node_set_axyz( i ); }\
 inline void X##_set_lb( const int lb )\
 {\
 	this->alpha_map::map1B##_set_lx( lb );\
-	this->alpha_map::map3ABC##_set_lb( lb );\
+	/*this->alpha_map::map3ABC##_set_lb( lb );*/\
 }\
 inline void X##_set_bxyz( const int i ){ this->map3node_set_bxyz( i ); }\
 inline void X##_set_l( const int l )/* need map3node_set_l( int ) to be set*/\
 {\
 	this->alpha_map::map1C##_set_lx(  l );\
-	this->alpha_map::map3ABC##_set_l( l );\
-	this->mx1##X##_set_l();\
+	/*this->alpha_map::map3ABC##_set_l( l );*/\
+	this->mx1##X##_set_it();\
 }\
 inline void X##_set_lmax(){ this->X##_set_l( this->alpha_map::l_max() ); }\
 /*alpha iteration*/\

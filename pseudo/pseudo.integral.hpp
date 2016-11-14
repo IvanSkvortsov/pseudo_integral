@@ -3,7 +3,7 @@
 #include"pseudo.integral.h"
 #include"n.abc.h"// from angular/
 #include"sf.math.h"// pown, fact_n, fact_2n1_n
-#include"ixs.angular.idx.h"
+#include"ixs.angular.idx.h"// to_compute
 #include"q.int.h"
 
 template<typename T, typename U> pseudo_integral<T,U>::pseudo_integral(): alpha_val<T,U>(), _mx1prim_size(), _mx1func_size(),
@@ -37,7 +37,7 @@ template<typename T, typename U> typename pseudo_integral<T,U>::const_reference 
 	// l
 	this->map3node_set_l( idx.get_l() );
 	this->alpha_map::map1C_set_lx( idx.get_l() );
-	this->mx1prim_set_l();
+	this->mx1prim_set_it();
 	//
 	this->prim_set_ia( idx.get_ia_p() );
 	this->prim_set_ib( idx.get_ib_p() );
@@ -64,7 +64,7 @@ template<typename T, typename U> typename pseudo_integral<T,U>::const_reference 
 	// l
 	this->map3node_set_l( idx.get_l() );
 	this->alpha_map::map1C_d_set_lx( idx.get_l() );
-	this->mx1func_set_l();
+	this->mx1func_set_it();
 	//
 	this->func_set_ia( idx.get_ia_p() );
 	this->func_set_ib( idx.get_ib_p() );
@@ -609,6 +609,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_max( qu_ra
 	for(int la = 0, ila_size = 1; la <= this->alpha_map::la_max(); ++la, ila_size += (la + 1) )
 	{
 		this->map3node_set_la( la );
+		//this->alpha_map::map1A_set_lx( la );
 		this->prim_set_la( la );// <- this->alpha_map::map1A_set_lx( la )
 		ixs_ang.map3node_set_la( la );
 		qu_rad.qu_dat_set_la( la );
@@ -621,6 +622,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_max( qu_ra
 			for(int lb = 0, ilb_size = 1; lb <= this->alpha_map::lb_max(); ++lb, ilb_size += (lb + 1) )
 			{
 				this->map3node_set_lb( lb );
+				//this->alpha_map::map1B_set_lx( lb );
 				this->prim_set_lb( lb );// <- this->alpha_map::map1B_set_lx( lb )
 				ixs_ang.map3node_set_lb( lb );
 				qu_rad.qu_dat_set_lb( lb );
@@ -638,7 +640,9 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_max( qu_ra
 					{
 						_lxyz.l = l;
 						this->map3node_set_l( l );
-						this->prim_set_l( l );
+						//this->alpha_map::map1C_set_lx( l );
+						//this->mx1prim_set_it();// M_mx1prim_data() + map3node_pos()
+						this->prim_set_l( l );// <- map1C_set_lx( l ); mx1prim_set_it() [M_mx1prim_data() + map3node_pos()]
 						ixs_ang.map3node_set_l( l );
 						ixs_ang.map3nx2_set_l( l );
 						ixs_ang.map2lmbA_set_l( l );
@@ -654,7 +658,9 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_max( qu_ra
 					}
 					// local
 					this->map3node_set_l( this->alpha_map::l_max() );
-					this->prim_set_l( this->alpha_map::l_max() );
+					//this->alpha_map::map1C_set_lx( this->alpha_map::l_max() );
+					//this->mx1prim_set_it();
+					this->prim_set_l( this->alpha_map::l_max() );// <- map1C_set_lx( l_max ); mx1prim_set_it()
 					ixs_ang.map3node_set_lmax();
 					ixs_ang.map3nx2_set_lmax();
 					ixs_ang.mx1ang_set_it();
@@ -951,7 +957,6 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid( qu_ra
 					ixs_ang.map3nx2_set_lmax();
 					ixs_ang.mx1ang_set_it();// ixs_ang.M_mx1ang_data() + ixs_ang.map3node_pos()
 					qu_rad.qu_dat_set_lmax();
-					std::clog << "----------------> Local part <---------------------" << std::endl;
 					this->comp_prim_mid_Local( _lxyz, qu_rad, ixs_ang );
 					__size += this->alpha_map::map3ABC_size();
 					// TODO: spin-orbit
@@ -971,7 +976,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 	{
 		this->prim_set_ia( ia );// <- %map1A_set_ix( ia )
 		qu_rad.qu_dat_set_ia( ia );
-		this->mx1kA_set_idx();// TODO: remove
+		//this->mx1kA_set_idx();// TODO: remove
 		for(int ib = 0; ib < this->alpha_map::map1B_size(); ++ib )
 		{
 			this->prim_set_ib( ib );// <- %map1B_set_ix( ib )
@@ -1016,16 +1021,20 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 			qu_rad.qu_radial_map::qu_set_lmb_a( lmb );
 			qu_rad.qu_radial_map::qu_set_lmb_b( 0 );
 			qu_rad.qu_dat_set_id( qu_rad.qu_radial_map::qu_idx() );
-			this->mx1A_set_idx();
-			this->mx1B_set_idx();
-			this->mx1C_set_idx();
-			T _alp = this->mx1A();
-			_alp  += this->mx1B();
-			_alp  += this->mx1C();
-			T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
-			psi_value += q_int * *__p_mx1ang;
-			//psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
+			//this->mx1A_set_idx();
+			//this->mx1B_set_idx();
+			//this->mx1C_set_idx();
+			//T _alp = this->mx1A();
+			//_alp  += this->mx1B();
+			//_alp  += this->mx1C();
+			//T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
+			//psi_value += q_int * *__p_mx1ang;
+			psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
 #ifdef  __PSEUDO_INTEGRAL_COMP_PRIM_PRINT
+		to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
+		to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
+		if( to_compute_value )
+		{
 			if( iter == 0 )
 				std::clog << std::endl;
 			if( iter % 50 == 0 )
@@ -1046,10 +1055,11 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_SemiLo
 				std::setw(6) << N << std::setw(3) << na << std::setw(4) << lmb <<
 				std::setw(25) << std::setprecision(15) << std::scientific << *__p_mx1ang <<
 				std::setw(25) << std::setprecision(15) << std::scientific << qu_rad.qu_dat_value() <<
-				std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
+				//std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
 				std::setw(25) << std::setprecision(15) << std::scientific << psi_value <<
 				std::endl;
 			++iter;
+		}
 #endif
 		}
 	}
@@ -1062,7 +1072,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local(
 	for(int ia = 0; ia < this->alpha_map::map1A_size(); ++ia )
 	{
 		this->prim_set_ia( ia );// <- %map1A_set_ix( ia )
-		this->mx1kA_set_idx();// TODO: remove
+		//this->mx1kA_set_idx();// TODO: remove
 		qu_rad.qu_dat_set_ia( ia );
 		for(int ib = 0; ib < this->alpha_map::map1B_size(); ++ib )
 		{
@@ -1110,16 +1120,20 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local_
 			qu_rad.qu_radial_map::qu_set_lmb_a( lmb );
 			qu_rad.qu_radial_map::qu_set_lmb_b( 0 );
 			qu_rad.qu_dat_set_id( qu_rad.qu_radial_map::qu_idx() );
-			this->mx1A_set_idx();
-			this->mx1B_set_idx();
-			this->mx1C_set_idx();
-			T _alp = this->mx1A(); 
-			_alp  += this->mx1B(); 
-			_alp  += this->mx1C(); 
-			T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
-			psi_value += q_int * *__p_mx1ang;
-			//psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
+			//this->mx1A_set_idx();
+			//this->mx1B_set_idx();
+			//this->mx1C_set_idx();
+			//T _alp = this->mx1A(); 
+			//_alp  += this->mx1B(); 
+			//_alp  += this->mx1C(); 
+			//T q_int = q_int_1f1<T>( N + 4, lmb, this->mx1kA(), _alp );
+			//psi_value += q_int * *__p_mx1ang;
+			psi_value += qu_rad.qu_dat_value() * *__p_mx1ang;
 #ifdef  __PSEUDO_INTEGRAL_COMP_PRIM_PRINT
+		to_compute_set_a( _lxyz.la, _lxyz.ax, _lxyz.ay, _lxyz.az );
+		to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
+		if( to_compute_value )
+		{
 			if( iter == 0 )
 				std::clog << std::endl;
 			if( iter % 50 == 0 )
@@ -1140,10 +1154,11 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_mid_Local_
 				std::setw(6) << N << std::setw(3) << na << std::setw(4) << lmb <<
 				std::setw(25) << std::setprecision(15) << std::scientific << *__p_mx1ang <<
 				std::setw(25) << std::setprecision(15) << std::scientific << qu_rad.qu_dat_value() <<
-				std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
+				//std::setw(25) << std::setprecision(15) << std::scientific << q_int <<
 				std::setw(25) << std::setprecision(15) << std::scientific << psi_value <<
 				std::endl;
 			++iter;
+		}
 #endif
 		}
 	}
@@ -1207,12 +1222,15 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_min( ixs_a
 						if( ixs_ang.mx1ang(0) != 0 )
 						{
 							this->comp_prim_min( la+lb, ixs_ang.mx1ang(0) );
-							this->incr_semi_local_count( this->alpha_map::map3ABC_size() );// <- semi_local_count
+							//this->incr_semi_local_count( this->alpha_map::map3ABC_size() );// <- semi_local_count
+							this->incr_semi_local_count( this->map3node_prim_size() );// <- semi_local_count
 						} else {
-							for(int i = 0; i < this->alpha_map::map3ABC_size(); ++i)
+							//for(int i = 0; i < this->alpha_map::map3ABC_size(); ++i)
+							for(int i = 0; i < this->map3node_prim_size(); ++i)
 								this->mx1prim_it()[i] = 0;
 						}
-						__size += this->alpha_map::map3ABC_size();
+						//__size += this->alpha_map::map3ABC_size();
+						__size += this->map3node_prim_size();
 					}
 					// local
 					this->map3node_set_l( this->alpha_map::l_max() );
@@ -1221,12 +1239,15 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_min( ixs_a
 					if( *xpn_v != 0 )
 					{
 						this->comp_prim_min( la+lb, *xpn_v );
-						this->incr_local_count( this->alpha_map::map3ABC_size() );// <- local_count
+						//this->incr_local_count( this->alpha_map::map3ABC_size() );// <- local_count
+						this->incr_local_count( this->map3node_prim_size() );// <- local_count
 					} else {
-						for(int i = 0; i < this->alpha_map::map3ABC_size(); ++i)
+						//for(int i = 0; i < this->alpha_map::map3ABC_size(); ++i)
+						for(int i = 0; i < this->map3node_prim_size(); ++i)
 							this->mx1prim_it()[i] = 0;
 					}
-					__size += this->alpha_map::map3ABC_size();
+					//__size += this->alpha_map::map3ABC_size();
+					__size += this->map3node_prim_size();
 					// TODO: spin-orbit
 				}
 			}
@@ -1236,7 +1257,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_min( ixs_a
 	return;
 }
 
-// int( r^(p) exp( -alp * r^2 ), dr=0..infty) = 1/2 * alp^( -(p+1)/2 ) * Gamma( (p+1)/2 ) = 1/2 * alp( -n ) * Gamma( n )
+// int( r^(p) exp( -alp * r^2 ), dr=0..infty) = 1/2 * alp^( -(p+1)/2 ) * Gamma( (p+1)/2 )
 template<typename T> static T pseudo_gamma( const int p, T const & alp )
 {
 	T value;
@@ -1248,9 +1269,11 @@ template<typename T> static T pseudo_gamma( const int p, T const & alp )
 	} else {// Gamma( n + 1/2 ) = (2n-1)!! * sqrt(Pi) / 2^n
 		value = math::fact_2n1_n( n - 1 );// (2 * (n - 1) + 1) = (2*n - 1)
 		value *= math::numeric_constants<T>::sqrt_pi;
-		T pow_alp = math::pown<T>( alp, n );
+		T _2alp = T(alp);
+		_2alp *= 2;
+		T pow_alp = math::pown<T>( _2alp, n );// (2 * alp)^n
 		pow_alp *= sqrt( alp );
-		value /= pow_alp;
+		value /= pow_alp;// Gamma( n + 1/2 ) / alp^(n + 1/2)
 		value *= 0.5;
 	}
 	return value;
@@ -1274,7 +1297,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_prim_min( const
 				_alp  = this->alpha_val<T,U>::mx1A();
 				_alp += this->alpha_val<T,U>::mx1B();
 				_alp += this->alpha_val<T,U>::mx1C();
-				nk = this->alpha_val<T,U>::mx1C_nk();
+				nk = this->alpha_val<T,U>::mx1C_nk() + __QU_RADIAL_DAT_R_POWN;// __QU_RADIAL_DAT_R_POWN = 2, or 0
 				this->prim_value() = pseudo_gamma<T>( lsum + nk, _alp );
 				this->prim_value() *= ixs_ang_value;
 			}

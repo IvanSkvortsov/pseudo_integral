@@ -34,6 +34,7 @@ int demo_pseudo( char const * file )
 	idx.set_bxyz( to_compute::get_bx(), to_compute::get_by(), to_compute::get_bz() );
 	const int * ax = idx.ax;
 	const int * bx = idx.bx;
+	pseud.print_cx();
 	std::clog << "la = " << idx.get_la() << ", ax = " << ax[0] << ", ay = " << ax[1] << ", az = " << ax[2] << std::endl;
 	std::clog << "lb = " << idx.get_lb() << ", bx = " << bx[0] << ", by = " << bx[1] << ", bz = " << bx[2] << std::endl;
 

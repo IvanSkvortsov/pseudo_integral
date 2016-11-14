@@ -1,1 +1,1 @@
-../__old_omega/vector.slm.32.src
+../omega/vector.slm.32.src

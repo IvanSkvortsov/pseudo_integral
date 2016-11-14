@@ -14,7 +14,7 @@
 
 #include"ixs.angular.mem.h"
 #include"ixs.angular.dat.h"
-#include"ixs.angular.idx.h"
+//#include"ixs.angular.idx.h"
 
 #include"qu.radial.mem.h"
 #include"qu.radial.dat.h"
@@ -374,11 +374,6 @@ struct pseudo_struct : public mapping_struct
 			basis_set<U> const * _b_tmp = this->bas_A;
 			this->bas_A = this->bas_B;
 			this->bas_B = _b_tmp;
-			// TODO: remove
-			const int __ax__[3] = {to_compute::get_ax(), to_compute::get_ay(), to_compute::get_az()};
-			const int __bx__[3] = {to_compute::get_bx(), to_compute::get_by(), to_compute::get_bz()};
-			to_compute_set_a_xyz( __bx__ );
-			to_compute_set_b_xyz( __ax__ );
 		}
 	}
 
