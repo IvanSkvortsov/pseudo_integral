@@ -195,27 +195,29 @@ template<typename T, typename U> void qu_radial_dat<T,U>::comp_qu_max()
 	for(int la = 0; la <= this->qu_radial_map::M_get_la_max(); ++la)
 	{
 		_lx.la = la;
-		this->qu_dat_set_la( la );// <- map1A_set_l( la )
-		this->map2AB_set_la( la );
-		this->map1powkA_set_lx( la );
-		this->map2powk_set_la( la );
+		this->qu_dat_set_la( la );// <- map1A_set_lx( la )
+		this->map2AB_set_la( la );// map of A-B exponent powers(alphas)/values(exp): set A angular momentum (set_la)
+		this->map1powkA_set_lx( la );// powers map of |kA| values - for semi-local part
+		this->map2powk_set_la( la );//  powers map of |k| = |kA + kB| - for local part
 		for(int lb = 0; lb <= this->qu_radial_map::M_get_lb_max(); ++lb)
 		{
 			_lx.lb = lb;
-			this->qu_dat_set_lb( lb );// <- map1B_set_l( lb )
-			this->map2AB_set_lb( lb );
-			this->map1powkB_set_lx( lb );
+			this->qu_dat_set_lb( lb );// <- map1B_set_lx( lb )
+			this->map2AB_set_lb( lb );// A-B map: set B angular momentum (set_lb)
+			this->map1powkB_set_lx( lb );// powers map of |kB| values - for semi-local part
 			// semi-local
 			for(int l = 0; l < this->qu_radial_map::M_get_l_max(); ++l)
 			{
 				_lx.l = l;
-				this->qu_dat_set_l( l );// <- map1C_set_l( l )
+				this->qu_dat_set_l( l );// <- map1C_set_lx( l )
 				this->comp_qu_max_SemiLocal( _lx, qu_1f11, _alp, _pown05_alp, _arr_maxsize );
 			}
 			this->map2powk_set_lb( lb );
 			// local
 			this->qu_dat_set_lmax();
 			this->comp_qu_max_Local( _lx, qu_1f1, _alp, _pown05_alp, _arr_maxsize );
+			// TODO: spin-orbit
+			this->comp_qu_max_SpinOrbit();
 		}
 	}
 }
@@ -227,38 +229,40 @@ void qu_radial_dat<T,U>::comp_qu_max_SemiLocal( _lx_struct const & _lx, qu_hyper
 	const int __nk_max = this->alpha_val<T,U>::mx1C_nk_max();
 	const int _alp_pown05_max = 2 * (_lx.la + _lx.lb + _lx.l ) + __nk_max + __QU_RADIAL_DAT_R_POWN + 1;
 	__qu_dat_assert__( _alp_pown05_max + 1 <= _arr_maxsize );
+	__qu_dat_assert__( this->alpha_map::map2AB_size() == this->alpha_map::map1A_size() * this->alpha_map::map1B_size() );
+	// P.S. it needs to be set alpha_map::map1B_set_lx( int ) to correctly usage of alpha_map::map2AB_set_ia( int ) method
 	for(int ia = 0, iter = 0; ia < this->alpha_map::map1A_size(); ++ia )
 	{
 		this->qu_dat_set_ia( ia );
 
-		this->alpha_map::map1A_set_ix( ia );
-		this->alpha_val<T,U>::mx1A_set_idx();
-		this->alpha_val<T,U>::mx1kA_set_idx();
+		this->alpha_map::map1A_set_ix( ia );// index ( map1A_idx() ) evaluated for mx1A, and mx1kA usage
+		this->alpha_val<T,U>::mx1A_set_idx(); // mx1A_set_idx( map1A_idx() );
+		this->alpha_val<T,U>::mx1kA_set_idx();// mx1kA_set_idx( map1A_idx() );
 		qu.set_k1( this->alpha_val<T,U>::mx1kA() );
 
-		this->alpha_map::map1powkA_set_ix( ia );
-		this->alpha_pow<T,U>::mx1powkA_set_idx();
+		this->alpha_map::map1powkA_set_ix( ia );// set index for mx1powkA usage
+		this->alpha_pow<T,U>::mx1powkA_set_idx();// mx1powkA_set_idx( map1powkA_idx() )
 
-		this->alpha_map::map2AB_set_ia( ia );
+		this->alpha_map::map2AB_set_ia( ia );// mx2AB_exp: a index for exp( -alpA * |CA|^2 ) * exp( -alpB * |CB|^2 )
 		for(int ib = 0; ib < this->alpha_map::map1B_size(); ++ib )
 		{
 			this->qu_dat_set_ib( ib );
 
-			this->alpha_map::map1B_set_ix( ib );
-			this->alpha_val<T,U>::mx1B_set_idx();
-			this->alpha_val<T,U>::mx1kB_set_idx();
+			this->alpha_map::map1B_set_ix( ib );// set index map1B_idx()
+			this->alpha_val<T,U>::mx1B_set_idx();// mx1B_set_idx( map1B_idx() )
+			this->alpha_val<T,U>::mx1kB_set_idx();// mx1kB_set_idx( map1B_idx() )
 			qu.set_k2( this->alpha_val<T,U>::mx1kB() );
 
 			this->alpha_map::map1powkB_set_ix( ib );
-			this->alpha_pow<T,U>::mx1powkB_set_idx();
+			this->alpha_pow<T,U>::mx1powkB_set_idx();// mx1powkB_set_idx( map1powkB_idx() )
 
-			this->alpha_map::map2AB_set_ib( ib );
-			this->alpha_val<T,U>::mx2AB_exp_set_idx();
+			this->alpha_map::map2AB_set_ib( ib );// b index for exp( -alpA * |CA|^2 ) * exp( -alpB * |CB|^2 )
+			this->alpha_val<T,U>::mx2AB_exp_set_idx();// mx2AB_exp_set_idx( map2AB_idx() )
 			for(int ic = 0, nk, _st = 0; ic < this->alpha_map::map1C_size(); ++ic )
 			{
 				this->qu_dat_set_ic( ic );
 				this->alpha_map::map1C_set_ix( ic );
-				this->alpha_val<T,U>::mx1C_set_idx();
+				this->alpha_val<T,U>::mx1C_set_idx();// mx1C_set_idx( map1C_idx() )
 
 				_alp = this->alpha_val<T,U>::mx1A();
 				_alp += this->alpha_val<T,U>::mx1B();
@@ -296,18 +300,18 @@ void qu_radial_dat<T,U>::comp_qu_max_SemiLocal_b( _lx_struct const& _lx, qu_hype
 	static int _it_err = 0;
 #endif
 	const int nk = this->mx1C_nk() + __QU_RADIAL_DAT_R_POWN;
-	for(int na = 0, lmbA_min, lmbA_max = _lx.l; na <= _lx.la; ++na, ++lmbA_max)
+	for(int na = 0, lmbA_min, lmbA_max = _lx.l + na; na <= _lx.la; ++na, ++lmbA_max)
 	{
 		lmbA_min = ( _lx.l < na ? (_lx.l + na)%2 : _lx.l - na );
 		__qu_dat_assert__( lmbA_max == _lx.l + na );
-		for(int nb = 0, N = na, Nk = N + nk, lmbB_min, lmbB_max = _lx.l; nb <= _lx.lb; ++nb, ++N, ++Nk, ++lmbB_max)
+		for(int nb = 0, N = na, Nk = N + nk, lmbB_min, lmbB_max = _lx.l + nb; nb <= _lx.lb; ++nb, ++N, ++Nk, ++lmbB_max)
 		{
 			this->qu_radial_map::qu_set_N( N );
 			__qu_dat_assert__( lmbB_max == _lx.l + nb );
 			lmbB_min = ( _lx.l < nb ? (_lx.l + nb)%2 : _lx.l - nb );
 			for(int lmb_A = lmbA_min; lmb_A <= lmbA_max; lmb_A += 2 )
 			{
-				// - values of pown( kA, lmb_A ) - this->alpha_pow<T,U>::mx1powkA( lmb_A );
+				// powers of |kA| - values of pown( kA, lmb_A ) - this->alpha_pow<T,U>::mx1powkA( lmb_A );
 				this->qu_radial_map::qu_set_lmb_a( lmb_A );
 
 				qu.set_lmb1( lmb_A );
@@ -353,7 +357,7 @@ void qu_radial_dat<T,U>::comp_qu_max_SemiLocal_b( _lx_struct const& _lx, qu_hype
 					this->qu_dat_value() *= this->alpha_val<T,U>::mx2AB_exp();// exp( -alpA * |CA|^2 - alpB * |CB|^2 )
 					this->qu_dat_value() *= 4;
 					this->qu_dat_value() *= math::numeric_constants<T>::pi;
-					this->qu_set_done();
+					this->qu_set_done();// set 2nd bit (done mask) to 1 (true value): is_done() <==> is value calculated?
 #if 0
 					T _alp = this->mx1A();
 					_alp  += this->mx1B();
@@ -476,29 +480,23 @@ void qu_radial_dat<T,U>::comp_qu_max_Local( _lx_struct const & _lx, qu_hyperg_1F
 	{
 		this->qu_dat_set_ia( ia );
 
-		this->alpha_map::map1A_set_ix( ia );
-		this->alpha_val<T,U>::mx1A_set_idx();
+		this->alpha_map::map1A_set_ix( ia );// set index map1A_idx() -> mx1A, mx1kA
+		this->alpha_val<T,U>::mx1A_set_idx();// mx1A_set_idx( map1A_idx() )
 		this->alpha_map::map2AB_set_ia( ia );
-		//this->alpha_val<T,U>::mx1kA_set_idx();
-		//qu.set_k1( this->alpha_val<T,U>::mx1kA() );
 
 		this->alpha_map::map2powk_set_ia( ia );
-		//this->alpha_pow<T,U>::mx1powkA_set_idx();
 		for(int ib = 0; ib < this->alpha_map::map1B_size(); ++ib )
 		{
 			this->qu_dat_set_ib( ib );
 			this->alpha_map::map1B_set_ix( ib );
-			this->alpha_val<T,U>::mx1B_set_idx();
-			this->alpha_val<T,U>::mx2k_set_idx();
+			this->alpha_val<T,U>::mx1B_set_idx();// mx1B_set_idx( map1B_idx() )
 			this->alpha_map::map2AB_set_ib( ib );
-			this->alpha_val<T,U>::mx2k_set_idx();
+			this->alpha_val<T,U>::mx2k_set_idx();// mx2k_set_idx( map2AB_idx() )
 			qu.set_k( this->alpha_val<T,U>::mx2k() );
-			this->alpha_val<T,U>::mx2AB_exp_set_idx();
-			//this->alpha_val<T,U>::mx1kB_set_idx();
-			//qu.set_k2( this->alpha_val<T,U>::mx1kB() );
+			this->alpha_val<T,U>::mx2AB_exp_set_idx();// mx2AB_exp_set_idx( map2AB_idx() )
 
 			this->alpha_map::map2powk_set_ib( ib );
-			this->alpha_pow<T,U>::mx2powk_set_idx();
+			this->alpha_pow<T,U>::mx2powk_set_idx();// mx2powk_set_idx( map2powk_idx() )
 			for(int ic = 0, nk, _st = 0; ic < this->alpha_map::map1C_size(); ++ic )
 			{
 				this->qu_dat_set_ic( ic );
@@ -541,18 +539,16 @@ void qu_radial_dat<T,U>::comp_qu_max_Local_b( _lx_struct const& _lx, qu_hyperg_1
 			this->qu_radial_map::qu_set_N( N );
 			for(int lmb = N%2, pow_sum = Nk + lmb + 1; lmb <= N; lmb += 2, pow_sum += 2 )
 			{
-				// - values of pown( k, lmb ) - this->alpha_pow<T,U>::mx2powk( lmb );
+				// powers of |k| - values of pown( k, lmb ) - this->alpha_pow<T,U>::mx2powk( lmb );
+				// powers of alp - value of alp^( pow_sum/2 ) - _pown05_alp[ pow_sum ];
 				this->qu_radial_map::qu_set_lmb_a( lmb );
-				this->qu_radial_map::qu_set_lmb_b( 0 );
+				this->qu_radial_map::qu_set_lmb_b( 0 );// set qu_radial_map::qu_idx()
 
 				qu.set_lmb( lmb );
 				if( this->qu_is_done() || !this->qu_idx_is_good() || !this->qu_is_on() )
 					continue;
 				// P.S. pow_sum = na + nb + nk + lmb + 1
 				__qu_dat_assert__( _alp_pown05_max >= pow_sum );
-				// - values of pown( kB, lmb_B ) - this->alpha_pow<T,U>::mx1powkB( lmb_B );
-				// - value of alp^( pow_sum/2 ) - _pown05_alp[ pow_sum ];
-
 				qu.set_a_2( pow_sum );
 				__qu_dat_assert__( qu.a_2 == (Nk + lmb + 1) );
 				this->qu_dat_set_id( this->qu_radial_map::qu_idx() );
@@ -636,24 +632,25 @@ template<typename T, typename U> void qu_radial_dat<T,U>::comp_qu_mid()
 	for(int la = 0; la <= this->qu_radial_map::M_get_la_max(); ++la)
 	{
 		_lx.la = la;
-		this->qu_dat_set_la( la );// <- map1A_set_l( la )
+		this->qu_dat_set_la( la );// <- map1A_set_lx( la )
 		this->map2AB_set_la( la );
-		this->map1powkA_set_lx( la );
+		this->map1powkA_set_lx( la );// both for local, ang semi-local parts
 		for(int lb = 0; lb <= this->qu_radial_map::M_get_lb_max(); ++lb)
 		{
 			_lx.lb = lb;
-			this->qu_dat_set_lb( lb );// <- map1B_set_l( lb )
+			this->qu_dat_set_lb( lb );// <- map1B_set_lx( lb )
 			this->map2AB_set_lb( lb );
 			// semi-local
 			for(int l = lb%2; l < this->qu_radial_map::M_get_l_max(); l += 2)
 			{
 				_lx.l = l;
-				this->qu_dat_set_l( l );// <- map1C_set_l( l )
+				this->qu_dat_set_l( l );// <- map1C_set_lx( l )
 				this->comp_qu_mid_SemiLocal( _lx, qu_1f1, _alp, _pown05_alp, _arr_maxsize );
 			}
 			// local
 			this->qu_dat_set_lmax();
 			this->comp_qu_mid_Local( _lx, qu_1f1, _alp, _pown05_alp, _arr_maxsize );
+			// TODO: spin-orbit
 		}
 	}
 }
@@ -671,27 +668,21 @@ void qu_radial_dat<T,U>::comp_qu_mid_Local( _lx_struct const & _lx, qu_hyperg_1F
 
 		this->alpha_map::map1A_set_ix( ia );
 		this->alpha_val<T,U>::mx1A_set_idx();
-		this->alpha_map::map2AB_set_ia( ia );
 		this->alpha_val<T,U>::mx1kA_set_idx();
 		qu.set_k( this->alpha_val<T,U>::mx1kA() );
 
 		this->alpha_map::map1powkA_set_ix( ia );
 		this->alpha_pow<T,U>::mx1powkA_set_idx();
+
+		this->alpha_map::map2AB_set_ia( ia );
 		for(int ib = 0; ib < this->alpha_map::map1B_size(); ++ib )
 		{
 			this->qu_dat_set_ib( ib );
 			this->alpha_map::map1B_set_ix( ib );
 			this->alpha_val<T,U>::mx1B_set_idx();
-			//this->alpha_val<T,U>::mx2k_set_idx();
+
 			this->alpha_map::map2AB_set_ib( ib );
 			this->alpha_val<T,U>::mx2AB_exp_set_idx();
-			//this->alpha_val<T,U>::mx2k_set_idx();
-			//qu.set_k( this->alpha_val<T,U>::mx2k() );
-			//this->alpha_val<T,U>::mx1kB_set_idx();
-			//qu.set_k2( this->alpha_val<T,U>::mx1kB() );
-
-			//this->alpha_map::map2powk_set_ib( ib );
-			//this->alpha_pow<T,U>::mx2powk_set_idx();
 			for(int ic = 0, nk, _st = 0; ic < this->alpha_map::map1C_size(); ++ic )
 			{
 				this->qu_dat_set_ic( ic );
@@ -735,7 +726,6 @@ void qu_radial_dat<T,U>::comp_qu_mid_Local_b( _lx_struct const& _lx, qu_hyperg_1
 			this->qu_radial_map::qu_set_N( N );
 			for(int lmb = N%2, pow_sum = Nk + lmb + 1; lmb <= N; lmb += 2, pow_sum += 2 )
 			{
-				// - values of pown( k, lmb ) - this->alpha_pow<T,U>::mx2powk( lmb );
 				this->qu_radial_map::qu_set_lmb_a( lmb );
 				this->qu_radial_map::qu_set_lmb_b( 0 );
 
@@ -744,8 +734,6 @@ void qu_radial_dat<T,U>::comp_qu_mid_Local_b( _lx_struct const& _lx, qu_hyperg_1
 					continue;
 				// P.S. pow_sum = na + nb + nk + lmb + 1
 				__qu_dat_assert__( _alp_pown05_max >= pow_sum );
-				// - values of pown( kB, lmb_B ) - this->alpha_pow<T,U>::mx1powkB( lmb_B );
-				// - value of alp^( pow_sum/2 ) - _pown05_alp[ pow_sum ];
 
 				qu.set_a_2( pow_sum );
 				__qu_dat_assert__( pow_sum == qu.a_2 );
@@ -762,6 +750,8 @@ void qu_radial_dat<T,U>::comp_qu_mid_Local_b( _lx_struct const& _lx, qu_hyperg_1
 					exit(1);
 				}
 				qu.set_coef_g();
+				// powers of |kA| - values of pown( kA, lmb ) - this->alpha_pow<T,U>::mx1powkA( lmb );
+				// powers of  alp - value of alp^( pow_sum/2 ) - _pown05_alp[ pow_sum ];
 				qu.set_coef( this->alpha_pow<T,U>::mx1powkA( lmb ), _pown05_alp, _alp_pown05_max );
 				this->qu_dat_value() = qu.value;
 				this->qu_dat_value() *= qu.coef;
@@ -770,9 +760,9 @@ void qu_radial_dat<T,U>::comp_qu_mid_Local_b( _lx_struct const& _lx, qu_hyperg_1
 				_alp  += this->mx1B();
 				_alp  += this->mx1C();
 				//T q_int = q_int_1f1<T>( Nk, lmb, this->mx1kA(), _alp );
-				//this->qu_dat_value() *= this->alpha_val<T,U>::mx2AB_exp();// exp( -alpA * |CA|^2 - alpB * |CB|^2 )
-				//this->qu_dat_value() *= sqrt( 2.0L );
-				//this->qu_dat_value() *= 2;
+				this->qu_dat_value() *= this->alpha_val<T,U>::mx2AB_exp();// exp( -alpA * |CA|^2 - alpB * |CB|^2 )
+				this->qu_dat_value() *= 4;
+				this->qu_dat_value() *= math::numeric_constants<T>::pi;
 				this->qu_set_done();
 #ifdef  __QU_RADIAL_DAT_PRINT
 				if( _it++ < IT_MAX )
@@ -928,8 +918,8 @@ void qu_radial_dat<T,U>::comp_qu_mid_SemiLocal_b( _lx_struct const& _lx, qu_hype
 				this->qu_dat_value() *= qu.coef;
 				this->qu_dat_value() *= qu.coef_g;
 				//this->qu_dat_value() *= this->alpha_val<T,U>::mx2AB_exp();// exp( -alpA * |CA|^2 - alpB * |CB|^2 )
-				//this->qu_dat_value() *= sqrt( 2.0L );
-				//this->qu_dat_value() *= 2;
+				this->qu_dat_value() *= 4;
+				this->qu_dat_value() *= math::numeric_constants<T>::pi;
 				this->qu_set_done();
 #ifdef  __QU_RADIAL_DAT_PRINT
 				if( _it++ < IT_MAX )

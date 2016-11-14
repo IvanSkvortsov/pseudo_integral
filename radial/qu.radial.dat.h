@@ -83,6 +83,7 @@ public:
 	void comp_qu_max_SemiLocal_b(_lx_struct const& _lx, qu_hyperg_1F11_struct<T> & qu_1f11, pointer _pown05_alp, const int _alp_pown05_max );
 	void comp_qu_max_Local( _lx_struct const & _lx, qu_hyperg_1F1_struct<T> & qu_1f1, T & _alp, pointer _pown05_alp, const int _arr_maxsize );
 	void comp_qu_max_Local_b(_lx_struct const& _lx, qu_hyperg_1F1_struct<T> & qu_1f1, pointer _pown05_alp, const int _alp_pown05_max );
+	void comp_qu_max_SpinOrbit(){}
 	void comp_qu_mid();
 	void comp_qu_mid_SemiLocal( _lx_struct const & _lx, qu_hyperg_1F1_struct<T> & qu_1f1, T & _alp, pointer _pown05_alp, const int _arr_midsize );
 	void comp_qu_mid_SemiLocal_b(_lx_struct const& _lx, qu_hyperg_1F1_struct<T> & qu_1f1, pointer _pown05_alp, const int _alp_pown05_mid );
@@ -165,21 +166,21 @@ public:
 	inline void qu_dat_set_la( int la )
 	{
 		this->qu_radial_map::qu_set_la( la );
-		this->alpha_map::map3ABC_set_la( la );
+		//this->alpha_map::map3ABC_set_la( la );
 		this->alpha_map::map1A_set_lx( la );
 		this->map3qu_set_la( la );
 	}
 	inline void qu_dat_set_lb( int lb )
 	{
 		this->qu_radial_map::qu_set_lb( lb );
-		this->alpha_map::map3ABC_set_lb( lb );
+		//this->alpha_map::map3ABC_set_lb( lb );
 		this->alpha_map::map1B_set_lx( lb );
 		this->map3qu_set_lb( lb );
 	}
 	inline void qu_dat_set_l( int l )
 	{
 		this->qu_radial_map::qu_set_l( l );
-		this->alpha_map::map3ABC_set_l( l );
+		//this->alpha_map::map3ABC_set_l( l );
 		this->alpha_map::map1C_set_lx( l );
 		this->map3qu_set_l( l );
 	}
@@ -217,8 +218,6 @@ public:
 	}
 	inline void qu_dat_set_ic( int i )
 	{
-		//this->_qu_dat_it_ic = this->_qu_dat_it_ib + i;
-		//this->_qu_dat_it_ic *= this->qu_dat_q();
 		__qu_dat_assert__( this->_M_mx1qu != 0 );
 		__qu_dat_assert__( this->M_mx1qu_data() != 0 );
 		this->_qu_dat_it_ic = this->M_mx1qu_data() + this->qu_dat_pos() + (this->_qu_dat_it_ib + i) * this->qu_dat_q();
