@@ -119,3 +119,10 @@ radial/qu.radial.alp.h
 basis/basis.map.*
 # pseudo
 pseudo/test.cpp
+pseudo/*.txt
+pseudo/alpha.mem.txt
+pseudo/ixs.angular.dat.txt
+pseudo/ixs.angular.mem.txt
+pseudo/pseudo.integral.txt
+pseudo/qu.radial.dat.txt
+pseudo/qu.radial.mem.txt
