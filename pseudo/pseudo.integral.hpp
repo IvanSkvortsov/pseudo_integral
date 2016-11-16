@@ -83,9 +83,21 @@ template<typename T, typename U> typename pseudo_integral<T,U>::const_reference 
 template<typename T, typename U> typename pseudo_integral<T,U>::const_reference pseudo_integral<T,U>::get_func( pseudo_index const & idx )
 {
 	static const T zero = 0; 
-	if( this->is_mapping_min() && idx.get_lb()%2 != idx.get_la()%2 && idx.get_l()%2 != idx.get_lb()%2 )
+	const bool is_4ab = idx.get_la()%2 != idx.get_lb()%2;
+	const bool is_4bc = (idx.get_l()%2 != idx.get_lb()%2) || (idx.get_l() > idx.get_lb());
+	const bool is_4ac = (idx.get_l()%2 != idx.get_la()%2) || (idx.get_l() > idx.get_la());
+	const bool is_local = idx.get_l() == this->alpha_map::l_max();
+	if
+	( this->is_mapping_min()
+		&& !(is_local)
+		&& (is_4ab || is_4bc || is_4ac)
+	)
 		return zero;
-	else if( this->is_mapping_mid() && idx.get_l()%2 != idx.get_lb()%2 )
+	else if
+	( this->is_mapping_mid()
+		&& !(is_local)
+		&& (is_4bc)
+	)
 		return zero;
 	// la, {ax, ay, az}
 	this->map3node_set_la( idx.get_la() );
@@ -602,7 +614,7 @@ template<typename T, typename U> void pseudo_integral<T,U>::comp_pseudo( qu_radi
 		basis_set<U> const & basA, ecp_set<U> const & ecp, basis_set<U> const & basB )
 {
 	this->comp_prim( qu_rad, ixs_ang );
-	//this->comp_func( basA, ecp, basB );
+	this->comp_func( basA, ecp, basB );
 }
 
 template<typename T, typename U> void pseudo_integral<T,U>::comp_func( basis_set<U> const & basA, ecp_set<U> const & ecp, basis_set<U> const & basB)
@@ -1603,12 +1615,12 @@ void pseudo_integral<T,U>::comp_func_b( T & __func_value, basis_fun<U> const & b
 	typename ecp_fun<U>::float_type const * p_primC;
 	U __coef2AB, __prim_coef, __c_value, __func_value__ = 0;
 	__func_value = 0;
-	for(int ia = basA_f.get_alp_pos(), i = 0; i < basA_f.get_fun_size(); ++i, ++ia )
+	for(int i = 0, ia = basA_f.get_alp_pos(); i < basA_f.get_fun_size(); ++i, ++ia )
 	{
 		this->prim_set_ia( ia );
 		this->alpha_map::map2AB_norm_set_ia( ia );
 		p_primA = basA_f.get_fun_data( i );
-		for(int ib = basB_f.get_alp_pos(), j = 0; j < basB_f.get_fun_size(); ++j, ++ib )
+		for(int j = 0, ib = basB_f.get_alp_pos(); j < basB_f.get_fun_size(); ++j, ++ib )
 		{
 			this->prim_set_ib( ib );
 			this->alpha_map::map2AB_norm_set_ib( ib );
@@ -1617,7 +1629,7 @@ void pseudo_integral<T,U>::comp_func_b( T & __func_value, basis_fun<U> const & b
 			__coef2AB = *p_primA;
 			__coef2AB *= *p_primB;
 			__c_value = 0;
-			for(int ic = ecp_f.get_alp_pos(), k = 0; k < ecp_f.get_fun_size(); ++k, ++ic )
+			for(int k = 0, ic = ecp_f.get_alp_pos(); k < ecp_f.get_fun_size(); ++k, ++ic )
 			{
 				this->prim_set_ic( ic );
 				this->prim_set_idx();
