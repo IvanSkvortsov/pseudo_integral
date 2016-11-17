@@ -1,0 +1,15 @@
+Averaged relativistic effective potential (AREP)
+
+executable file name: 'pseudo/pseudo.struct.exe'
+input file name: 'pseudo/pseudo.struct.inp'
+
+compilation and linkage:
+The easiest way is to run 'make remake_all' in pseudo/ directory
+
+P.S. There some problem with links of files (make sure of their content);
+link file names:
+poly_n/array.n.h      -> array/array.n.h
+spherical/array.n.h   -> array/array.n.h
+spherical/array.scp.h -> array/array.scp.h
+spherical/poly.n.h    -> poly_n/poly.n.h
+pseudo/mx.slm.txt     -> omega/vector.slm.32.src
