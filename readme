@@ -8,8 +8,12 @@ The easiest way is to run 'make remake_all' in pseudo/ directory
 
 P.S. There some problem with links of files (make sure of their content);
 link file names:
-poly_n/array.n.h      -> array/array.n.h
-spherical/array.n.h   -> array/array.n.h
-spherical/array.scp.h -> array/array.scp.h
-spherical/poly.n.h    -> poly_n/poly.n.h
-pseudo/mx.slm.txt     -> omega/vector.slm.32.src
+alpha/vector.slm.32.src   -> omega/vector.slm.32.src
+angular/vector.slm.32.src -> omega/vector.slm.32.src
+omega/file.xpn            -> xyz_pown_integral/xyz.pown.integral.src
+poly_n/array.n.h          -> array/array.n.h
+pseudo/mx.slm.txt         -> omega/vector.slm.32.src
+radial/smart.time.h       -> pseudo/smart.time.h
+spherical/array.n.h       -> array/array.n.h
+spherical/array.scp.h     -> array/array.scp.h
+spherical/poly.n.h        -> poly_n/poly.n.h (not typo, make 'spherical/poly.n.h' link of -> 'poly_n/poly.n.h')
