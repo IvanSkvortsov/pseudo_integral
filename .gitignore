@@ -72,7 +72,7 @@ xyz.p.integral.h
 xyz.spherical.h
 macro.loop.h
 # alpha/
-alpha/*.siz.*
+
 # omega
 omega/trash/
 omega/rpown.*
@@ -86,8 +86,8 @@ array/*old.cpp
 # spherical
 spherical/array
 spherical/data_s/
-spherical/array.*
-spherical/poly.n.*
+spherical/poly.n.cpp
+spherical/poly.n.hpp
 spherical/r.spherical.*
 spherical/x.polynomial.*
 spherical/x.spherical.*

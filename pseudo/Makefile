@@ -79,7 +79,7 @@ remake_all:
 	cd ../array;              make clean; make all;
 	cd ../poly_n;             make clean; make all;
 	cd ../memorystream;       make clean; make all;
-	cd ../mmap;               make clean; make all;
+	cd ../mmap;               make clean; make libmmap.a;
 	cd ../omega;              make clean; make all;
 	cd ../alpha;              make clean; make all;
 	cd ../hyperg;             make clean; make all;
@@ -87,7 +87,7 @@ remake_all:
 	cd ../angular;            make clean; make all;
 	make pseudo.struct.exe
 
-pseudo.struct.exe: pseudo.struct.h pseudo.struct.demo.h pseudo.struct.main.cpp $(objects) $(pseudo_obj) $(task01_obj)
+pseudo.struct.exe: pseudo.struct.h pseudo.struct.demo.h pseudo.struct.main.cpp $(objects) $(pseudo_obj) $(task01_obj) libtask01.a
 	$(CXX) $(CXXFLAGS) -o $@ pseudo.struct.main.cpp $(objects) $(pseudo_obj) $(libraries)
 
 pseudo.integral.o: pseudo.integral.h pseudo.integral.hpp pseudo.integral.cpp
