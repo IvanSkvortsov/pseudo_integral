@@ -101,6 +101,7 @@ void alpha_slm<T,U>::assign_mx2slm( alpha_pow<T,U> const & palp )
 #endif
 }
 
+// mx1powkA, mx1powkB, mx2slm (+ mx2k, mx2powk)
 template<typename T, typename U>
 void alpha_slm<T,U>::init_mxslm( U const * CA, U const * A_alp, U const * CB, U const * B_alp, matrix_slm<U> const & mx_slm)
 {
@@ -120,6 +121,7 @@ void alpha_slm<T,U>::init_mxslm( U const * CA, U const * A_alp, U const * CB, U 
 		v3d = CB; v3d.len( CB_len );
 		this->init_mx1powkB( CB_len, B_alp );
 		this->init_mx2slm( CA, A_alp, CB, B_alp, mx_slm );
+		this->init_mx1kB3( CB, B_alp );
 		break;
 	default :
 		this->error("init_mxslm", "undefined mapping type");
@@ -128,6 +130,7 @@ void alpha_slm<T,U>::init_mxslm( U const * CA, U const * A_alp, U const * CB, U 
 	}
 }
 
+// mx2slm (+ mx2k, mx2powk)
 template<typename T, typename U>
 void alpha_slm<T,U>::init_mx2slm( U const * CA, U const * A_alp, U const * CB, U const * B_alp, matrix_slm<U> const & mx_slm)
 {

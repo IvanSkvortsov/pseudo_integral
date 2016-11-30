@@ -44,6 +44,33 @@ inline void read_alp( const char * name, istream & inp, T * _vec, const int _siz
 	}
 	cout << endl;
 }
+template<typename T> inline T v3_scalar( T const * lhs_v3, T const * rhs_v3 )
+{
+	T _sqr;
+	_sqr = 0;
+	for(int i = 0; i < 3; ++i)
+		_sqr += lhs_v3[i] * rhs_v3[i];
+	return _sqr;
+}
+template<typename T> inline T v3_sqr( T const * v3 ){ return v3_scalar<T>( v3, v3 ); }
+
+template<typename T> inline void read_geom( std::istream & inp, T * v3_CA, T * v3_CB, T & CA, T & CB, T &CACB )
+{
+	inp >> v3_CA[0] >> v3_CA[1] >> v3_CA[2];
+	v3_CB[0] = (v3_CA[1] - v3_CA[2])/2;
+	v3_CB[1] = (v3_CA[0] + v3_CA[2])/3;
+	v3_CB[2] = (v3_CA[0] + v3_CA[1])/2;
+	CA = sqrt( v3_sqr( v3_CA ) );
+	CB = sqrt( v3_sqr( v3_CB ) );
+	CACB = v3_scalar( v3_CA, v3_CB );
+	cout << setw(10) << "CA" << " : "; for(int i = 0; i < 3; ++i) cout << setw(24) << setprecision(14) << scientific << v3_CA[i]; cout << endl;
+	cout << setw(10) << "CB" << " : "; for(int i = 0; i < 3; ++i) cout << setw(24) << setprecision(14) << scientific << v3_CB[i]; cout << endl;
+	cout << setw(10) << "CA_len" << " : " << setw(24) << setprecision(14) << scientific << CA << endl;
+	cout << setw(10) << "CB_len" << " : " << setw(24) << setprecision(14) << scientific << CB << endl;
+	cout << setw(10) << "CAxCB" << " : " << setw(24) << setprecision(14) << scientific << CACB << endl;
+	//inp >> CA >> CB >> CACB;
+}
+
 template<typename T, typename U>
 int demo_val(const char * file)
 {
@@ -76,8 +103,8 @@ int demo_val(const char * file)
 	_b_size = read_lxsize( "alpha B", inp, _Bsize, _lmax._lb_max + 1 );
 	_c_size = read_lxsize( "alpha C", inp, _Csize, _lmax._l_max + _lmax._lso_max + 1 );
 
-	U CA, CB, CACB;
-	inp >> CA >> CB >> CACB;
+	U v3_CA[3], v3_CB[3], CA, CB, CACB;
+	read_geom( inp, v3_CA, v3_CB, CA, CB, CACB );
 
 	vector<U> _Avec( _a_size ), _Bvec( _b_size ), _Cvec( _c_size );
 	read_alp( "alpha A", inp, _Avec.data(), _a_size );
@@ -93,6 +120,9 @@ int demo_val(const char * file)
 	av.write_mxalp( ms, _lmax, _alpsize );
 
 	av.init_map( _Asize, _Bsize, _Csize );
+	av.init_mxalp( _Avec.data(), _Bvec.data(), _Cvec.data(), v3_CA, v3_CB );
+	/*
+	av.init_mx1_alp( _Avec.data(), _Bvec.data(), _Cvec.data() );
 	if( av.is_mapping_min() )
 		av.init_mxalp( _Avec.data(), _Bvec.data(), _Cvec.data() );
 	else if( av.is_mapping_mid() )
@@ -104,7 +134,7 @@ int demo_val(const char * file)
 		cerr << "Error: [demo_val] mapping undefined" << endl;
 		return 2;
 	}
-	av.init_mx1_alp( _Avec.data(), _Bvec.data(), _Cvec.data() );
+	*/
 	av.init_norm( _Avec.data(), _Bvec.data() );
 
 	print_i( "mx1A_norm.size", av.M_mx1A_norm_size() );
@@ -168,6 +198,25 @@ int demo_val(const char * file)
 	U sqr_CA = CA * CA, sqr_CB = CB * CB;
 	int iter = 0, IT_MAX = 100;
 	av.init_exp( _Avec.data(), _Bvec.data(), CA * CA, CB * CB );
+	cout << setw(4) << "lb" << setw(4) << "ib" << setw(5) << "idx" <<
+		setw(24) << "kB_x" << setw(24) << "kB_y" << setw(24) << "kB_z" << endl << endl;
+	for(int lb = 0; lb < av.lb_size(); ++lb)
+	{
+		av.alpha_map::map1B_set_lx( lb );
+		for(int ib = 0; ib < av.alpha_map::map1B_size(); ++ib)
+		{
+			av.alpha_map::map1B_set_ix( ib );
+			av.mx1kB3_set_idx();
+			if( iter++ >= IT_MAX )
+				continue;
+			cout << setw(4) << lb << setw(4) << ib <<
+				setw(5) << av.alpha_map::map1B_idx();
+			for(int it = 0; it < 3; ++it)
+				cout << setw(24) << setprecision(14) << scientific << av.mx1kB3()[it];
+			cout << endl;
+		}
+	}
+	iter = 0;
 	for(int la = 0; la < av.la_size(); ++la)
 	{
 		av.alpha_map::map1A_set_lx( la );
@@ -191,7 +240,7 @@ int demo_val(const char * file)
 					U xb = -sqr_CB * av.mx1B();
 					U x = xa + xb;
 					if( iter++ >= IT_MAX )
-						break;
+						continue;
 					if( iter%50 == 1 )
 					cout << setw(4) << "la" << setw(4) << "lb" << setw(4) << "ia" << setw(4) << "ib" <<
 						setw(5) << "idx" <<
@@ -211,6 +260,8 @@ int demo_val(const char * file)
 						endl;
 				}
 			}
+			if( iter >= IT_MAX )
+				continue;
 			cout << endl;
 		}
 	}

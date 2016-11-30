@@ -32,7 +32,9 @@ public:
 	alpha_slm<T,U> & operator=( alpha_slm<T,U> const & );
 
 	void assign_mx2slm( alpha_pow<T,U> const & palp );
+	// mx1powkA, mx1powkB, mx2slm (+ mx2k, mx2powk)
 	void init_mxslm( U const * CA, U const * A_alp, U const * CB, U const * B_alp, matrix_slm<U> const & mx_slm );
+	// mx2slm (+ mx2k, mx2powk)
 	void init_mx2slm( U const * CA, U const * A_alp, U const * CB, U const * B_alp, matrix_slm<U> const & mx_slm );
 
 	inline U const * mx2slm()const{ return this->std::vector<U>::data() + this->map2slm_idx(); }

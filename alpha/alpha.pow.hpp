@@ -153,19 +153,25 @@ alpha_pow<T,U>::read_mxpow( memorystream & ms )
 	return ms.tell() - _seek_start;
 }
 
-#define __ALPHA_POW_INIT_MX1POWKX( powkX, X, x, CX, X_alp, T, U )\
-for(int lx = 0; lx < this->l##x##_size(); ++lx)\
+#define __ALPHA_POW_INIT_MX1POWKX( powkX, mx1kX, map1X, mx1X, lx_max, _2CX_len, X_alp, __size, T, U )\
+for(int lx = 0; lx <= (lx_max); ++lx)\
 {\
 	this->map1##powkX##_set_lx( lx );\
-	this->map1##X##_set_lx( lx );\
+	this->map1X##_set_lx( lx );\
 	p_mx1powkX = this->_M_mx1##powkX->data() + this->map1##powkX##_pos();\
-	p_mx1kX = this->_M_mx1k##X->data() + this->map1##X##_pos();\
-	for(int i = 0; i < this->map1##X##_size(); ++i, ++p_mx1kX)\
+	p_mx1kX = this->_M_mx1kX->data() + this->map1X##_pos();\
+	__size += this->map1X##_size() * this->map1##powkX##_size();\
+	for(int i = 0; i < this->map1X##_size(); ++i, ++p_mx1kX)\
 	{\
+		this->map1X##_set_ix( i );\
+		this->map1##powkX##_set_ix( i );\
+		__alp_pow_assert__( this->map1X##_idx() < this->M_##mx1X##_size() );\
+		__alp_pow_assert__( this->map1X##_idx() == this->map1X##_pos() + i );\
+		__alp_pow_assert__( this->map1##powkX##_idx() == this->map1##powkX##_pos() + i * this->map1##powkX##_size() );\
+		__alp_pow_assert__( this->map1##powkX##_idx() < this->M_mx1##powkX##_size() );\
 		u = 1; *p_mx1powkX++ = 1;\
-		_kXlen = CX;\
-		_kXlen *= X_alp[this->map1##X##_pos() + i];\
-		_kXlen *= 2;\
+		_kXlen = _2CX_len;\
+		_kXlen *= X_alp[this->map1X##_idx()];\
 		*p_mx1kX = math::convert_float<T,U>( _kXlen );\
 		for(int k = 1; k < this->map1##powkX##_size(); ++k, ++p_mx1powkX)\
 		{\
@@ -175,47 +181,28 @@ for(int lx = 0; lx < this->l##x##_size(); ++lx)\
 	}\
 }
 
+// mx1powkA (+ mx1kA)
 template<typename T, typename U>
-void alpha_pow<T,U>::init_mx1powkA( U const & CX, U const * X_alp )
+void alpha_pow<T,U>::init_mx1powkA( U const & CX_len, U const * X_alp )
 {
 	pointer p_mx1powkX, p_mx1kX;
+	const U _2CX_len = 2 * CX_len;
 	U u(0), _kXlen;
-	//__ALPHA_POW_INIT_MX1POWKX( powkA, A, a, CX, X_alp, T, U );
 	size_type __size = 0;
-	for(int lx = 0; lx <= this->la_max(); ++lx)
-	{
-		this->map1powkA_set_lx( lx );
-		this->map1A_set_lx( lx );
-		p_mx1powkX = this->_M_mx1powkA->data() + this->map1powkA_pos();
-		p_mx1kX = this->_M_mx1kA->data() + this->map1A_pos();
-		__size += this->map1A_size() * this->map1powkA_size();
-		for(int i = 0; i < this->map1A_size(); ++i, ++p_mx1kX)
-		{
-			this->map1A_set_ix( i );
-			this->map1powkA_set_ix( i );
-			__alp_pow_assert__( this->map1A_idx() < this->M_mx1A_size() );
-			__alp_pow_assert__( this->map1powkA_idx() == this->map1powkA_pos() + i * this->map1powkA_size() );
-			__alp_pow_assert__( this->map1powkA_idx() < this->M_mx1powkA_size() );
-			u = 1; *p_mx1powkX++ = 1;
-			_kXlen = CX;
-			_kXlen *= X_alp[this->map1A_pos() + i];
-			_kXlen *= 2;
-			*p_mx1kX = math::convert_float<T,U>( _kXlen );
-			for(int k = 1; k < this->map1powkA_size(); ++k, ++p_mx1powkX)
-			{
-				u *= _kXlen;
-				*p_mx1powkX = math::convert_float<T,U>( u );
-			}
-		}
-	}
+	__ALPHA_POW_INIT_MX1POWKX( powkA, mx1kA, map1A, mx1A, this->la_max(), _2CX_len, X_alp, __size, T, U );
 	__alp_pow_assert__( __size == this->M_mx1powkA_size() );
 }
+
+// mx1powkB (+ mx1kB)
 template<typename T, typename U>
-void alpha_pow<T,U>::init_mx1powkB( U const & CX, U const * X_alp )
+void alpha_pow<T,U>::init_mx1powkB( U const & CX_len, U const * X_alp )
 {
 	pointer p_mx1powkX, p_mx1kX;
+	const U _2CX_len = 2 * CX_len;
 	U u(0), _kXlen;
-	__ALPHA_POW_INIT_MX1POWKX( powkB, B, b, CX, X_alp, T, U );
+	size_type __size = 0;
+	__ALPHA_POW_INIT_MX1POWKX( powkB, mx1kB, map1B, mx1B, this->lb_max(), _2CX_len, X_alp, __size, T, U );
+	__alp_pow_assert__( __size == this->M_mx1powkB_size() );
 }
 template<typename T, typename U>
 void alpha_pow<T,U>::init_mx2powk(U const * CA, U const * A_alp, U const * CB, U const * B_alp)// TODO: merge together with %init_mx2k
@@ -223,6 +210,8 @@ void alpha_pow<T,U>::init_mx2powk(U const * CA, U const * A_alp, U const * CB, U
 	pointer p_mx2powk, p_mx2k;
 	U u(0), _klen;
 	vector_3d<U> kA, kB, k;
+	const U m2_CA[3] = {U(-2 * CA[0]), U(-2 * CA[1]), U(-2 * CA[2]) };
+	const U m2_CB[3] = {U(-2 * CB[0]), U(-2 * CB[1]), U(-2 * CB[2]) };
 	for(int la = 0; la < this->la_size(); ++la)
 	{
 		this->map1A_set_lx( la );
@@ -237,14 +226,12 @@ void alpha_pow<T,U>::init_mx2powk(U const * CA, U const * A_alp, U const * CB, U
 			p_mx2k = this->_M_mx2k->data() + this->map2AB_pos();
 			for(int i = 0; i < this->map1A_size(); ++i)
 			{
-				kA = CA;
+				kA = m2_CA;
 				kA *= A_alp[i + this->map1A_pos()];
-				kA *= -2;
 				for(int j = 0; j < this->map1B_size(); ++j, ++p_mx2k)
 				{
-					kB = CB;
+					kB = m2_CB;
 					kB *= B_alp[j + this->map1B_pos()];
-					kB *= -2;
 
 					k = kA;
 					k += kB;

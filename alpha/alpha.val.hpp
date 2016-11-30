@@ -2,14 +2,15 @@
 #define __ALPHA_VAL_HPP__
 #include"alpha.val.h"
 #include"sf.math.h"// convert_float, sqrt
+#include"vector.3d.h"
 #include<cstring>// memcpy
 #include"n.abc.h"
 
 template<typename T, typename U> alpha_val<T,U>::alpha_val(): alpha_map(), _mx1C_nk_max(), _M_mx1A(), _M_mx1B(), _M_mx1C(), _M_mx1C_nk(),
-	_M_mx1kA(), _M_mx1kB(), _M_mx2k(), _M_mx2AB_exp(), _M_mx1A_norm(), _M_mx1B_norm(), _M_mx2AB_norm(), __ALPHA_VAL_ITER_INIT_LIST {}
+	_M_mx1kA(), _M_mx1kB(), _M_mx1kB3(), _M_mx2k(), _M_mx2AB_exp(), _M_mx1A_norm(), _M_mx1B_norm(), _M_mx2AB_norm(), __ALPHA_VAL_ITER_INIT_LIST {}
 template<typename T, typename U> alpha_val<T,U>::alpha_val( alpha_val<T,U> const & v ): alpha_map( v ), _mx1C_nk_max( v._mx1C_nk_max ),
 	_M_mx1A( v._M_mx1A ), _M_mx1B( v._M_mx1B ), _M_mx1C( v._M_mx1C ), _M_mx1C_nk( v._M_mx1C_nk ),
-	_M_mx1kA( v._M_mx1kA ), _M_mx1kB( v._M_mx1kB ), _M_mx2k( v._M_mx2k ), _M_mx2AB_exp( v._M_mx2AB_exp ),
+	_M_mx1kA( v._M_mx1kA ), _M_mx1kB( v._M_mx1kB ), _M_mx1kB3( v._M_mx1kB3 ), _M_mx2k( v._M_mx2k ), _M_mx2AB_exp( v._M_mx2AB_exp ),
 	_M_mx1A_norm( v._M_mx1A_norm ), _M_mx1B_norm( v._M_mx1B_norm), _M_mx2AB_norm( v._M_mx2AB_norm), __ALPHA_VAL_ITER_INIT_LIST {}
 template<typename T, typename U> alpha_val<T,U> & alpha_val<T,U>::operator=( alpha_val<T,U> const & v )
 {
@@ -61,6 +62,7 @@ const typename alpha_val<T,U>::size_type alpha_val<T,U>::comp_size(_lmax_struct 
 	case maximum :
 		__size += this->comp_size_mx1T( __alpsize._a_size );// mx1kA
 		__size += this->comp_size_mx1T( __alpsize._b_size );// mx1kB
+		__size += this->comp_size_mx1T3( __alpsize._b_size );// mx1kB3
 		__size += this->comp_size_mx1T( __alpsize._a_size * __alpsize._b_size );// mx2k
 		break;
 	default :
@@ -84,6 +86,12 @@ template<typename T, typename U>
 const typename alpha_val<T,U>::size_type alpha_val<T,U>::comp_size_mx1T( const size_type __mx_size) const
 {
 	return this->comp_size_mx1( __mx_size, sizeof(T) );
+}
+
+template<typename T, typename U>
+const typename alpha_val<T,U>::size_type alpha_val<T,U>::comp_size_mx1T3( const size_type __mx_size) const
+{
+	return this->comp_size_mx1( __mx_size, sizeof(float_x3_type) );
 }
 
 template<typename T, typename U> const typename alpha_val<T,U>::size_type
@@ -111,6 +119,7 @@ alpha_val<T,U>::write_mxalp( memorystream & ms, _lmax_struct const & __lmax, _al
 	case maximum :
 		this->write_mx1T( ms, this->_M_mx1kA, __alpsize._a_size );
 		this->write_mx1T( ms, this->_M_mx1kB, __alpsize._b_size );
+		this->write_mx1T3( ms, this->_M_mx1kB3, __alpsize._b_size );
 		this->write_mx1T( ms, this->_M_mx2k, __alpsize._a_size * __alpsize._b_size );
 		break;
 	default :
@@ -147,6 +156,17 @@ void alpha_val<T,U>::write_mx1T( memorystream & ms, matrix_cursor_1<T> * & __mx1
 }
 
 template<typename T, typename U>
+void alpha_val<T,U>::write_mx1T3( memorystream & ms, matrix_cursor_1<float_x3_type> * & __mx1, const size_type __size1)
+{
+	//_matrixPtr __cnvrt = {ms.getcur()};
+	_matrixPtr __cnvrt;
+	__cnvrt._void = ms.getcur();
+	__mx1 = __cnvrt._matrix1_T3;
+	__mx1->size() = __size1;
+	ms.seek( sizeof(size_struct<1>) + sizeof(float_x3_type) * __mx1->size(), seek_dir::cur );
+}
+
+template<typename T, typename U>
 const typename alpha_val<T,U>::size_type alpha_val<T,U>::read_mxalp( memorystream & ms )
 {
 	size_type _seek_start = ms.tell();
@@ -170,6 +190,7 @@ const typename alpha_val<T,U>::size_type alpha_val<T,U>::read_mxalp( memorystrea
 	case maximum :
 		this->read_mx1T( ms, this->_M_mx1kA );
 		this->read_mx1T( ms, this->_M_mx1kB );
+		this->read_mx1T3( ms, this->_M_mx1kB3 );
 		this->read_mx1T( ms, this->_M_mx2k );
 		break;
 	default :
@@ -201,6 +222,16 @@ void alpha_val<T,U>::read_mx1T( memorystream & ms, matrix_cursor_1<T> * & __mx1)
 	__cnvrt._void = ms.getcur();
 	__mx1 = __cnvrt._matrix1_T;
 	ms.seek( sizeof(size_struct<1>) + sizeof(T) * __mx1->size(), seek_dir::cur );
+}
+
+template<typename T, typename U>
+void alpha_val<T,U>::read_mx1T3( memorystream & ms, matrix_cursor_1<float_x3_type> * & __mx1)
+{
+	//_matrixPtr __cnvrt = {ms.getcur()};
+	_matrixPtr __cnvrt;
+	__cnvrt._void = ms.getcur();
+	__mx1 = __cnvrt._matrix1_T3;
+	ms.seek( sizeof(size_struct<1>) + sizeof(float_x3_type) * __mx1->size(), seek_dir::cur );
 }
 
 template<typename T, typename U>
@@ -417,6 +448,33 @@ void alpha_val<T,U>::init_exp( U const * _A_alp, U const * _B_alp, U const & sqr
 }
 
 template<typename T, typename U>
+void alpha_val<T,U>::init_mxalp( U const * _A_alp, U const * _B_alp, U const * _C_alp, U const * CA, U const * CB )
+{
+	this->init_mx1_alp( _A_alp, _B_alp, _C_alp );
+	vector_3d<U> _CA( CA ), _CB( CB );
+	U CA_len, CB_len, CAxCB;
+	CA_len = _CA.len();
+	switch( this->get_mapping() )
+	{
+	case minimum :
+	case middle  :
+		this->init_mx1X( this->_M_mx1kA, _A_alp, this->a_size(), CA_len );
+		break;
+	case maximum :
+		CB_len = _CB.len();
+		CAxCB = _CA.scalar( _CB );
+		this->init_mx1X( this->_M_mx1kA, _A_alp, this->a_size(), CA_len );
+		this->init_mx1X( this->_M_mx1kB, _B_alp, this->b_size(), CB_len );
+		this->init_mx1kB3( CB, _B_alp );
+		this->init_mx2k( _A_alp, _B_alp, CA_len, CB_len, CAxCB );
+		break;
+	default :
+		this->error("init_mxalp", "undefined mapping type");
+		std::cerr << "current mapping type : " << this->get_mapping() << std::endl;
+		exit(1);
+	}
+}
+template<typename T, typename U>
 void alpha_val<T,U>::init_mxalp( U const * _A_alp, U const * _B_alp, U const * _C_alp, U const & CA, U const & CB, U const & CACB )
 {
 	this->init_mx1_alp( _A_alp, _B_alp, _C_alp );
@@ -526,6 +584,30 @@ void alpha_val<T,U>::init_mx2k( U const * _A_alp, U const * _B_alp, U const & CA
 					_t = sqrt( _t );
 					*p = math::convert_float<T,U>( _t );
 				}
+			}
+		}
+	}
+}
+template<typename T, typename U>
+void alpha_val<T,U>::init_mx1kB3( U const * CX, U const * X_alp )
+{
+	// mx1kB3 - array of 3d-vectors
+	const U m2_CX[3] = {U(-2*CX[0]), U(-2*CX[1]), U(-2*CX[2])};
+	U kx;
+	for(int lx = 0; lx <= this->lb_max(); ++lx)
+	{
+		this->map1B_set_lx( lx );
+		for(int i = 0; i < this->map1B_size(); ++i )
+		{
+			this->map1B_set_ix( i );
+			__alp_val_assert__( this->map1B_idx() < this->M_mx1B_size() );
+			__alp_val_assert__( this->map1B_idx() == this->map1B_pos() + i );
+			this->mx1kB3_set_idx();
+			for(int k = 0; k < 3; ++k)
+			{
+				kx = m2_CX[k];
+				kx *= X_alp[this->map1B_idx()];
+				this->mx1kB3()[k] = math::convert_float<T,U>( kx );
 			}
 		}
 	}
