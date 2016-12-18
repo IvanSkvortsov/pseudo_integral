@@ -73,7 +73,7 @@ const typename qu_radial_map::size_type qu_radial_map::map1qu_dat_SIZE_max( _lma
 	{
 		for(size_type lb = 0, __dat_N = la + 1, __dat_SIZE; lb <= __lmax._lb_max; ++lb, ++__dat_N)
 		{
-			// semi-loca part
+			// semi-local part
 			for(size_type l = 0, __dat_M = la + 1, __dat_P = lb + 1; l < __lmax._l_max; ++l, ++__dat_M, ++__dat_P)
 			{
 				__dat_SIZE = __dat_N;//  la + lb + 1
@@ -85,6 +85,14 @@ const typename qu_radial_map::size_type qu_radial_map::map1qu_dat_SIZE_max( _lma
 			__dat_SIZE = __dat_N;
 			__dat_SIZE *= __dat_N;
 			__size += __dat_SIZE;// (la + lb + 1)^2
+			// spin-orbit part
+			for(size_type l = 1, __dat_M = la + 2, __dat_P = lb + 2; l <= __lmax._lso_max; ++l, ++__dat_M, ++__dat_P)
+			{
+				__dat_SIZE = __dat_N;//  la + lb + 1
+				__dat_SIZE *= __dat_M;// la + l  + 1
+				__dat_SIZE *= __dat_P;// lb + l  + 1
+				__size += __dat_SIZE;
+			}
 		}
 	}
 	return __size;
@@ -96,7 +104,7 @@ const typename qu_radial_map::size_type qu_radial_map::map1qu_dat_SIZE_mid( _lma
 	{
 		for(size_type lb = 0, __dat_N = la + 1, __dat_SIZE; lb <= __lmax._lb_max; ++lb, ++__dat_N)
 		{
-			// semi-loca part
+			// semi-local part
 			for(size_type l = 0, __dat_M = la + 1; l < __lmax._l_max; ++l, ++__dat_M )
 			{
 				__dat_SIZE = __dat_N;//  la + lb + 1
@@ -107,6 +115,13 @@ const typename qu_radial_map::size_type qu_radial_map::map1qu_dat_SIZE_mid( _lma
 			__dat_SIZE = __dat_N;
 			__dat_SIZE *= __dat_N;
 			__size += __dat_SIZE;// (la + lb + 1)^2
+			// spin-orbit part
+			for(size_type l = 1, __dat_M = la + 2; l <= __lmax._lso_max; ++l, ++__dat_M )
+			{
+				__dat_SIZE = __dat_N;//  la + lb + 1
+				__dat_SIZE *= __dat_M;// la + l  + 1
+				__size += __dat_SIZE;
+			}
 		}
 	}
 	return __size;
@@ -127,9 +142,9 @@ const typename qu_radial_map::size_type qu_radial_map::write_map( memorystream &
 	} __cnvrt;
 	__cnvrt._void = ms.getcur();
 	this->_M_map3qu_pos = __cnvrt._map3qu;
-	this->_M_map3qu_pos->n() = this->map3qu_pos_N( __lmax );
-	this->_M_map3qu_pos->m() = this->map3qu_pos_M( __lmax );
-	this->_M_map3qu_pos->p() = this->map3qu_pos_P( __lmax );
+	this->_M_map3qu_pos->n() = this->map3qu_pos_N( __lmax );// (la_max + 1)
+	this->_M_map3qu_pos->m() = this->map3qu_pos_M( __lmax );// (lb_max + 1)
+	this->_M_map3qu_pos->p() = this->map3qu_pos_P( __lmax );// (l_max + lso_max + 1)
 	this->_M_map3qu_pos->init_size();
 	ms.seek( sizeof(size_struct<3>) + this->_M_map3qu_pos->size() * sizeof(map3qu_pos_type), seek_dir::cur );
 
@@ -206,6 +221,21 @@ void qu_radial_map::init_map_max()
 
 			this->qu_size() = this->init_map1qu_dat_max_local( la, lb );
 			__map1qu_pos += this->map1qu_size();
+			// spin-orbit
+			for(size_type l = 1, __dat_M = la + 2, __dat_P = lb + 2; l <= this->M_get_lso_max(); ++l, ++__dat_M, ++__dat_P)
+			{
+				this->map3qu_pos_set_l( l + this->M_get_l_max() );
+
+				this->map1qu_n() = __dat_N;
+				this->map1qu_m() = __dat_M;
+				this->map1qu_p() = __dat_P;
+
+				this->map1qu_size() = (__dat_N * __dat_M * __dat_P);
+				this->map1qu_pos() = __map1qu_pos;
+
+				this->qu_size() = this->init_map1qu_dat_max_semilocal( la, lb, l );// same as for semi-local and spin-orbit
+				__map1qu_pos += this->map1qu_size();
+			}
 		}
 	}
 }
@@ -249,6 +279,21 @@ void qu_radial_map::init_map_mid()
 
 			this->qu_size() = this->init_map1qu_dat_mid_local( la, lb );
 			__map1qu_pos += this->map1qu_size();
+			// semi-local
+			for(size_type l = 1, __dat_M = la + 2; l <= this->M_get_lso_max(); ++l, ++__dat_M )
+			{
+				this->map3qu_pos_set_l( l + this->M_get_l_max() );
+
+				this->map1qu_n() = __dat_N;// la + lb + 1
+				this->map1qu_m() = __dat_M;// la + l  + 1
+				this->map1qu_p() = 1;
+
+				this->map1qu_size() = (__dat_N * __dat_M);
+				this->map1qu_pos() = __map1qu_pos;
+
+				this->qu_size() = this->init_map1qu_dat_mid_semilocal( la, lb, l );// same as for semi-local and spin-orbit
+				__map1qu_pos += this->map1qu_size();
+			}
 		}
 	}
 }

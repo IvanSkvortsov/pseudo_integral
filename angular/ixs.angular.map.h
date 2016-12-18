@@ -8,6 +8,9 @@
 #define __IXS_ANGULAR_MAP_DEBUG
 #ifdef  __IXS_ANGULAR_MAP_DEBUG
   #include<cassert>
+  #define __ixs_ang_map_assert__( expression ) assert( (expression) )
+#else
+  #define __ixs_ang_map_assert__( expression )
 #endif
 
 #define __IXS_ANGULAR_MAP_MAP2LMB( lmbX )\
@@ -199,9 +202,7 @@ public:
 		this->_map3node_it_l  = this->_M_node->data();
 		this->_map3node_it_l += this->_map3node_it_ib;
 		this->_map3node_it_l += l;
-#ifdef  __IXS_ANGULAR_MAP_DEBUG
-		assert( this->_map3node_it_l == this->_M_node->data( this->_map3node_it_ib + l ) );
-#endif
+		__ixs_ang_map_assert__( this->_map3node_it_l == this->_M_node->data( this->_map3node_it_ib + l ) );
 	}
 	inline int & map3node_pos (){ return this->_map3node_it_l->_pos;}
 	inline int & map3node_size(){ return this->_map3node_it_l->_size;}

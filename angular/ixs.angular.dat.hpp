@@ -7,9 +7,10 @@
 #include"ixs.angular.idx.h"
 #include"sf.math.h"
 
-template<typename T, typename U> ixs_angular_dat<T,U>::ixs_angular_dat() : memory_map(), memorystream(), ixs_angular_map(), _M_mx1ang(){}
+template<typename T, typename U> ixs_angular_dat<T,U>::ixs_angular_dat() : memory_map(), memorystream(), ixs_angular_map(), _M_mx1ang(),
+	__IXS_DATA_ITERLIST{}
 template<typename T, typename U> ixs_angular_dat<T,U>::ixs_angular_dat(ixs_angular_dat<T,U> const & v) : memory_map(), memorystream(v),
-	ixs_angular_map( v ), _M_mx1ang(v._M_mx1ang){}
+	ixs_angular_map( v ), _M_mx1ang(v._M_mx1ang), __IXS_DATA_ITERLIST{}
 
 template<typename T, typename U> ixs_angular_dat<T,U> & ixs_angular_dat<T,U>::operator=(ixs_angular_dat<T,U> const & v)
 {
@@ -163,20 +164,36 @@ void ixs_angular_dat<T,U>::comp_ang_max( geom_slm<U> & geom_s, alpha_slm<T,U> & 
 					//to_compute_set_b( _lxyz.lb, _lxyz.bx, _lxyz.by, _lxyz.bz );
 					//if( !to_compute_value ) continue;
 					// semi-local
-					for(int l = 0; l < this->ixs_angular_map::l_max(); ++l )
+					// l = 0
+					_lxyz.l = 0;
+					this->ixs_angular_map::map3node_set_l( 0 );
+					this->mx1ang_sc_set_idx();// %_mx1ang_sc_it = %_M_mx1ang->data() + %ixs_angular_map::map3node_pos()
+					//__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
+					this->ixs_angular_map::map3nx2_set_l( 0 );
+					this->ixs_angular_map::map2lmbA_set_l( 0 );
+					this->ixs_angular_map::map2lmbB_set_l( 0 );
+
+					qu_rad.qu_radial_map::qu_set_l( 0 );
+					this->comp_ang_max_SemiLocal( _lxyz, geom_s, qu_rad, ixs_omg );
+					for(int l = 1; l < this->l_max || l < this->lso_max(); ++l )
 					{
 						_lxyz.l = l;
-						this->ixs_angular_map::map3node_set_l( l );
-						__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
+						this->ixs_angular_map::map3node_set_l( l );// semi-local
+						this->mx1ang_sc_set_idx();// %_mx1ang_sc_it = %_M_mx1ang->data() + %ixs_angular_map::map3node_pos()
+						//__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
+						this->ixs_angular_map::map3node_set_l( this->l_max() + l );// spin-orbit
+						this->mx1ang_so_set_idx();// %_mx1ang_so_it = %_M_mx1ang->data() + %ixs_angular_map::map3node_pos()
+						//__p_mx1ang_so = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
 						this->ixs_angular_map::map3nx2_set_l( l );
 						this->ixs_angular_map::map2lmbA_set_l( l );
 						this->ixs_angular_map::map2lmbB_set_l( l );
 
-						qu_rad.qu_radial_map::qu_set_l( l );
-						this->comp_ang_max_SemiLocal( __p_mx1ang, _lxyz, geom_s, qu_rad, ixs_omg );
+						qu_rad.qu_radial_map::qu_set_l( l );// TODO: so iteration
+						this->comp_ang_max_SemiLocal( _lxyz, geom_s, qu_rad, ixs_omg );
 					}
 					// local
 					this->ixs_angular_map::map3node_set_lmax();
+					//this->mx1ang_sc_set_idx();// %_mx1ang_sc_it = %_M_mx1ang->data() + %ixs_angular_map::map3node_pos()
 					__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
 					this->ixs_angular_map::map3nx2_set_lmax();
 
@@ -191,7 +208,39 @@ void ixs_angular_dat<T,U>::comp_ang_max( geom_slm<U> & geom_s, alpha_slm<T,U> & 
 							this->comp_ang_max_Local( __p_mx1ang, _lxyz, geom_s, alp_s, qu_rad, ixs_omg );
 						}
 					}
-					// TODO: spin-orbit part
+					// P.S. lso = 1..lso_max
+					// sequential iteration: 0..l_max, 1..lso_max -- total number of elements = (l_max + 1) + lso_max
+					// index of last elements: = l_max + lso_max
+					// TODO: spin-orbit part (so_semi_local)
+					/*
+					for(int l = this->ixs_angular_map::l_max()+1, lso = 1; lso < this->ixs_angular_map::lso_max(); ++lso, ++l )
+					{
+						_lxyz.l = l;
+						this->ixs_angular_map::map3node_set_l( l );// iteration
+						__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
+						this->ixs_angular_map::map3nx2_set_l( lso );
+						this->ixs_angular_map::map2lmbA_set_l( lso );
+						this->ixs_angular_map::map2lmbB_set_l( lso );
+
+						qu_rad.qu_radial_map::qu_set_l( l );// iteration
+						this->comp_ang_max_SemiLocal_so( __p_mx1ang, _lxyz, geom_s, qu_rad, ixs_omg );
+					}
+					// spin-orbig (so_local)
+					this->ixs_angular_map::map3node_set_l( this->l_max() + this->lso_max() );// iteration
+					__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
+					this->ixs_angular_map::map3nx2_set_l( this->ixs_angular_map::lso_max() );
+
+					qu_rad.qu_radial_map::qu_set_l( this->l_max() + this->lso_max() );
+					for(int ia = 0; ia < alp_s.map1A_size(); ++ia)
+					{
+						alp_s.map2slm_set_ia( ia );
+						for(int ib = 0; ib < alp_s.map1B_size(); ++ib, __p_mx1ang += this->ixs_angular_map::map3node_size() )
+						{
+							alp_s.map2slm_set_ib( ib );
+							this->comp_ang_max_Local_so( __p_mx1ang, _lxyz, geom_s, alp_s, qu_rad, ixs_omg );
+						}
+					}
+					*/
 				}
 			}
 		}
@@ -504,15 +553,17 @@ void ixs_angular_dat<T,U>::comp_ang_max_Local_b(U & angular_value, _lxyz_struct 
 }
 
 template<typename T, typename U>
-void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(pointer __p_mx1ang, _lxyz_struct const & _lxyz, geom_slm<U> & geom_s, qu_radial_dat<T,U> & qu_rad,
-		ixs_omega<T,U> const & ixs_omg)
+void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal( _lxyz_struct const & _lxyz, geom_slm<U> & geom_s,
+		qu_radial_dat<T,U> & qu_rad, ixs_omega<T,U> const & ixs_omg)
 {
 #ifdef  __IXS_ANGULAR_DATA_PRINT
 	static const int IT_MAX = 1000;
 	static int _it = 0;
 #endif
-	static U angular_value(0);
-	T * __p_mx1ang_beg = __p_mx1ang;
+	static U angular_value[4] = {U(0), U(0), U(0), U(0)};
+	__ixs_ang_assert__( this->mx1ang_sc_size() == this->mx1ang_so_size() );
+	T * __p_mx1ang_sc_beg = this->mx1ang_sc_data(), * __p_mx1ang_so_beg = this->mx1ang_so_data();
+	//T * __p_mx1ang_beg = __p_mx1ang;
 
 	ixs_omega<T,U> ixs_omg_a( ixs_omg ), ixs_omg_b( ixs_omg );
 	ixs_omg_a.set_l( _lxyz.l );
@@ -533,9 +584,7 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(pointer __p_mx1ang, _lxyz_stru
 			ixs_ang.map3nx2_set_nb( nb );
 			ixs_ang.map2lmbB_set_nx( nb );
 			__size += ixs_ang.map3nx2();// size += lmb_a_size * lmb_b_size
-#ifdef  __IXS_ANGULAR_DATA_DEBUG
 			__ixs_ang_assert__( ixs_ang.map3nx2() == ixs_ang.map2lmbA_size() * ixs_ang.map2lmbB_size() );
-#endif
 			_nx.nb = nb;
 			ixs_omg_b.set_lx( nb );
 			for(int i_lmb_a = 0, lmb_a = ixs_ang.map2lmbA_min(); i_lmb_a < ixs_ang.map2lmbA_size(); ++i_lmb_a, lmb_a += 2)
@@ -545,7 +594,7 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(pointer __p_mx1ang, _lxyz_stru
 				geom_s.slm_kA_set_lx( lmb_a );
 				ixs_omg_a.set_lambda_i( i_lmb_a );
 				for(int i_lmb_b = 0, lmb_b = ixs_ang.map2lmbB_min(); i_lmb_b < ixs_ang.map2lmbB_size(); ++i_lmb_b, lmb_b += 2,
-						++__p_mx1ang)
+						++__p_mx1ang_sc)
 				{
 					_nx.lmbB = lmb_b;
 					qu_rad.qu_radial_map::qu_set_lmb_b( lmb_b );
@@ -553,7 +602,8 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(pointer __p_mx1ang, _lxyz_stru
 					ixs_omg_b.set_lambda_i( i_lmb_b );
 					// la, (ax,ay,az), lb, (bx,by,bz), l, na, nb
 					this->comp_ang_max_SemiLocal_b( angular_value, _lxyz, _nx, geom_s, ixs_omg_a, ixs_omg_b );
-					*__p_mx1ang = math::convert_float<T,U>( angular_value );
+					//*__p_mx1ang_sc = math::convert_float<T,U>( ang_sc_value );
+					//*__p_mx1ang_so = math::convert_float<T,U>( ang_so_value );
 #ifdef  __IXS_ANGULAR_DATA_DEBUG
 					__ixs_ang_assert__( qu_rad.qu_radial_map::qu_idx() != qu_radial_map::MAP1QU_DAT_INIT_NUM );
 #endif
@@ -572,11 +622,13 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal(pointer __p_mx1ang, _lxyz_stru
 		}
 	}
 #if defined (__IXS_ANGULAR_DATA_SIZECHECK)
-	if( __p_mx1ang - __p_mx1ang_beg != __size )
+	//if( __p_mx1ang - __p_mx1ang_beg != __size )
+	if( this->mx1ang_sc_data() - __p_mx1ang_sc_beg != __size && this->mx1ang_so_data() - __p_mx1ang_so_beg != __size * 3 )
 	{
 		this->error("comp_ang_max_SemiLocal", "size error");
-		std::cerr << "computed size : " << std::setw(8) << __size << std::endl;
-		std::cerr << "actual   size : " << std::setw(8) << __p_mx1ang - __p_mx1ang_beg << std::endl;
+		std::cerr << " computed size : " << std::setw(8) << __size << std::endl;
+		std::cerr << "actual sc size : " << std::setw(8) << this->mx1ang_sc_data() - __p_mx1ang_sc_beg << std::endl;
+		std::cerr << "actual so size : " << std::setw(8) << this->mx1ang_so_data() - __p_mx1ang_so_beg << std::endl;
 		exit(1);
 	}
 #endif

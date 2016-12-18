@@ -4,11 +4,14 @@
 #include"matrix.cursor.h"// matrix_cursor, size_struct<n>::size_type
 #include"mapping.t.h"// mapping_struct
 #include"alpha.siz.h"// alpha_siz::_lmax_struct
+#include"assert.config.h"
 
 //#define __QU_RADIAL_MAP_INIT_LOG
 #define __QU_RADIAL_MAP_MIDDLE_SPEC
 
-#define __QU_RADIAL_MAP_DEBUG
+#if __QU_RADIAL_MAP_ASSERT
+  #define __QU_RADIAL_MAP_DEBUG
+#endif
 #ifdef  __QU_RADIAL_MAP_DEBUG
   #include<cassert>
   #define __assert__( arg ) assert( (arg) )

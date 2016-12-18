@@ -27,6 +27,7 @@
   #define __ixs_ang_assert__( arg )
 #endif
 
+#define __IXS_DATA_ITERLIST _mx1ang_sc_it(), _mx1ang_so_it()
 
 template<typename T, typename U>
 struct ixs_angular_dat: public memory_map, public memorystream, public ixs_angular_map
@@ -51,7 +52,7 @@ public:
 	} _nx_struct;
 protected:
 	matrix_cursor_1<T> * _M_mx1ang;
-	pointer _mx1ang_it;
+	pointer _mx1ang_sc_it, _mx1ang_so_it;
 
 	inline void error(const char * _method, const char _message[] = "nothing to do here")const
 	{
@@ -111,11 +112,17 @@ public:
 	inline const_pointer M_mx1ang_data(int i)const{__ixs_ang_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->data(i);}
 	inline size_type const & M_mx1ang_size()const{__ixs_ang_assert__( this->_M_mx1ang != 0 ); return this->_M_mx1ang->size();}
 
-	inline void mx1ang_set_it(){ this->_mx1ang_it = this->M_mx1ang_data() + this->ixs_angular_map::map3node_pos(); }
-	inline pointer mx1ang_data(){ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it; }
-	inline const_pointer mx1ang_data()const{ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it; }
-	inline reference mx1ang( int i ){ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it[i]; }
-	inline const_reference mx1ang( int i )const{ __ixs_ang_assert__( this->_mx1ang_it != 0 ); return this->_mx1ang_it[i]; }
+	inline void mx1ang_so_set_idx(){ this->_mx1ang_so_it = this->M_mx1ang_data() + this->ixs_angular_map::map3node_pos(); }
+	inline pointer mx1ang_so_data(){ __ixs_ang_assert__( this->_mx1ang_so_it != 0 ); return this->_mx1ang_so_it; }
+	inline const_pointer mx1ang_so_data()const{ __ixs_ang_assert__( this->_mx1ang_so_it != 0 ); return this->_mx1ang_so_it; }
+	inline reference mx1ang_so( int i ){ __ixs_ang_assert__( this->_mx1ang_so_it != 0 ); return this->_mx1ang_so_it[i]; }
+	inline const_reference mx1ang_so( int i )const{ __ixs_ang_assert__( this->_mx1ang_so_it != 0 ); return this->_mx1ang_so_it[i]; }
+
+	inline void mx1ang_sc_set_idx(){ this->_mx1ang_sc_it = this->M_mx1ang_data() + this->ixs_angular_map::map3node_pos(); }
+	inline pointer mx1ang_sc_data(){ __ixs_ang_assert__( this->_mx1ang_sc_it != 0 ); return this->_mx1ang_sc_it; }
+	inline const_pointer mx1ang_sc_data()const{ __ixs_ang_assert__( this->_mx1ang_sc_it != 0 ); return this->_mx1ang_sc_it; }
+	inline reference mx1ang_sc( int i ){ __ixs_ang_assert__( this->_mx1ang_sc_it != 0 ); return this->_mx1ang_sc_it[i]; }
+	inline const_reference mx1ang_sc( int i )const{ __ixs_ang_assert__( this->_mx1ang_sc_it != 0 ); return this->_mx1ang_sc_it[i]; }
 
 #ifdef  __IXS_ANGULAR_DATA_TEST
 	void test_print( T const & value, _lxyz_struct const & _lxyz, _nx_struct const & _nx )const;

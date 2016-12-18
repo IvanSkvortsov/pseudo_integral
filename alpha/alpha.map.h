@@ -4,8 +4,11 @@
 #include"matrix.cursor.h"
 #include"mapping.t.h"
 #include"alpha.siz.h"
+#include"assert.config.h"
 
-#define __ALPHA_MAP_DEBUG
+#if  __ALPHA_MAP_ASSERT
+  #define __ALPHA_MAP_DEBUG
+#endif
 #ifdef  __ALPHA_MAP_DEBUG
   #include<cassert>
   #define __alp_map_assert__( arg ) assert( (arg) )

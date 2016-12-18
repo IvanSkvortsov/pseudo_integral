@@ -1,8 +1,11 @@
 #ifndef __ALPHA_VAL_H__
 #define __ALPHA_VAL_H__
 #include"alpha.map.h"// memorystream, matrix_cursor
+//#include"assert.config.h"
 
-#define __ALPHA_VAL_DEBUG
+#if __ALPHA_VAL_ASSERT// 'assert.config.h'
+  #define __ALPHA_VAL_DEBUG
+#endif
 #ifdef  __ALPHA_VAL_DEBUG
   #include<cassert>
   #define __alp_val_assert__( arg ) assert( (arg) )

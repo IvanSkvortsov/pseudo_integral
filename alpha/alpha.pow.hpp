@@ -159,7 +159,7 @@ for(int lx = 0; lx <= (lx_max); ++lx)\
 	this->map1##powkX##_set_lx( lx );\
 	this->map1X##_set_lx( lx );\
 	p_mx1powkX = this->_M_mx1##powkX->data() + this->map1##powkX##_pos();\
-	p_mx1kX = this->_M_mx1kX->data() + this->map1X##_pos();\
+	p_mx1kX = this->_M_##mx1kX->data() + this->map1X##_pos();\
 	__size += this->map1X##_size() * this->map1##powkX##_size();\
 	for(int i = 0; i < this->map1X##_size(); ++i, ++p_mx1kX)\
 	{\

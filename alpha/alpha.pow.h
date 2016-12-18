@@ -1,8 +1,11 @@
 #ifndef __ALPHA_POW_H__
 #define __ALPHA_POW_H__
 #include"alpha.val.h"
+//#include"assert.config.h"
 
-#define __ALPHA_POW_DEBUG
+#if __ALPHA_POW_ASSERT
+  #define __ALPHA_POW_DEBUG// 'assert.config.h'
+#endif
 #ifdef  __ALPHA_POW_DEBUG
   #include<cassert>
   #define __alp_pow_assert__( arg ) assert( (arg) )

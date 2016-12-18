@@ -6,6 +6,7 @@
 #include"qu.hyperg.1F1.struct.h"
 #include"qu.hyperg.1F11.struct.h"
 //#include"q.int.h"
+//#include"assert.config.h"
 
 //#define __QU_RADIAL_DAT_PRINT
 #ifdef  __QU_RADIAL_DAT_PRINT
@@ -15,7 +16,9 @@
 #define __QU_RADIAL_DAT_R_POWN 2
 //#define __QU_RADIAL_DAT_R_POWN 0
 
-#define __QU_RADIAL_DAT_DEBUG
+#if __QU_RADIAL_DAT_ASSERT
+  #define __QU_RADIAL_DAT_DEBUG
+#endif
 #ifdef  __QU_RADIAL_DAT_DEBUG
   #include<cassert>
   #define __qu_dat_assert__( arg ) assert( (arg) )

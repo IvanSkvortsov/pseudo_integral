@@ -3,13 +3,16 @@
 #include<vector>
 #include"alpha.pow.h"
 #include"matrix.slm.h"
+//#include"assert.config.h"
 
 #define __ALPHA_SLM_TYPENAMESTR
 #ifdef  __ALPHA_SLM_TYPENAMESTR
   #include"type.name.str.h"
 #endif
 
-#define __ALPHA_SLM_DEBUG
+#if __ALPHA_SLM_ASSERT
+  #define __ALPHA_SLM_DEBUG
+#endif
 //#define __ALPHA_SLM_LOG
 //#define __ALPHA_SLM_TIME
 

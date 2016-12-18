@@ -63,15 +63,13 @@ const typename ixs_angular_map::size_type ixs_angular_map::write_map( memorystre
 	this->_M_node->init_size();
 	ms.seek( sizeof(size_struct<3>) + sizeof(_pos1_struct)*this->_M_node->size(), seek_dir::cur );
 
-#ifdef  __IXS_ANGULAR_MAP_DEBUG
-	assert( this->_M_lmax != 0 );
-	assert( this->_M_mappos != 0 );
-	assert( this->_M_mapping_t != 0 );
+	__ixs_ang_map_assert__( this->_M_lmax != 0 );
+	__ixs_ang_map_assert__( this->_M_mappos != 0 );
+	__ixs_ang_map_assert__( this->_M_mapping_t != 0 );
 
-	assert( this->_M_map_lmb != 0 );
-	assert( this->_M_map_nx2 != 0 );
-	assert( this->_M_node != 0 );
-#endif
+	__ixs_ang_map_assert__( this->_M_map_lmb != 0 );
+	__ixs_ang_map_assert__( this->_M_map_nx2 != 0 );
+	__ixs_ang_map_assert__( this->_M_node != 0 );
 	return ms.tell() - _seek_start;
 }
 
@@ -109,15 +107,13 @@ const typename ixs_angular_map::size_type ixs_angular_map::read_map( memorystrea
 	this->_M_node = __cnvrt._node;
 	ms.seek( sizeof(size_struct<3>) + sizeof(_pos1_struct)*this->_M_node->size(), seek_dir::cur );
 
-#ifdef  __IXS_ANGULAR_MAP_DEBUG
-	assert( this->_M_lmax != 0 );
-	assert( this->_M_mappos != 0 );
-	assert( this->_M_mapping_t != 0 );
+	__ixs_ang_map_assert__( this->_M_lmax != 0 );
+	__ixs_ang_map_assert__( this->_M_mappos != 0 );
+	__ixs_ang_map_assert__( this->_M_mapping_t != 0 );
 
-	assert( this->_M_map_lmb != 0 );
-	assert( this->_M_map_nx2 != 0 );
-	assert( this->_M_node != 0 );
-#endif
+	__ixs_ang_map_assert__( this->_M_map_lmb != 0 );
+	__ixs_ang_map_assert__( this->_M_map_nx2 != 0 );
+	__ixs_ang_map_assert__( this->_M_node != 0 );
 	return ms.tell() - _seek_start;
 }
 
@@ -235,6 +231,24 @@ void ixs_angular_map::init_node_min( size_type & __pos, const int & la, const in
 	}
 	// local
 	// not need
+	// spin-orbit
+	for(int lso = 2-la%2, l = this->l_max() + lso; lso <= this->lso_max() && lso <= lb && lso <= la; lso += 2, l += 2 )
+	{
+		this->map3node_set_l( l );
+		this->map3node_size() = 1;
+		this->map3node_pos() = __pos;
+		__pos += 3;
+#ifdef  __IXS_ANGULAR_MAP_LOG
+		if( iter%100 == 0 )
+		{
+		std::clog << std::setw(8) << it << std::setw(14) << iter << "  [" << this->_map3node_it_l << "]" <<
+			std::setw(14) << this->_map3node_it_l - this->_M_node->data() <<
+			std::setw(14) << this->_M_node->size() << std::endl;
+		++it;
+		}
+		++iter;
+#endif
+	}
 }
 void ixs_angular_map::init_node_mid( size_type & __pos, const int & la, const int & lb )
 {
@@ -271,6 +285,21 @@ void ixs_angular_map::init_node_mid( size_type & __pos, const int & la, const in
 	this->map3node_pos() = __pos;
 	this->map3node_size() = __size;
 	__pos += __size;
+	// spin-orbit
+	for(int lso = 2-lb%2, l = this->l_max() + lso; lso <= this->lso_max() && lso <= lb; lso += 2, l += 2 )
+	{
+		this->map3node_set_l( l );
+		this->map2lmbA_set_l( lso );
+		__size = 0;
+		for(int na = 0; na <= la; ++na )
+		{
+			this->map2lmbA_set_nx( na );
+			__size += this->map2lmbA_size();
+		}
+		this->map3node_pos() = __pos;
+		this->map3node_size() = __size;
+		__pos += __size * 3;
+	}
 }
 
 void ixs_angular_map::init_node_max( size_type & __pos, const int & la, const int & lb, alpha_map & alp_m )
@@ -312,6 +341,25 @@ void ixs_angular_map::init_node_max( size_type & __pos, const int & la, const in
 	this->map3node_pos() = __pos;
 	__size *= alp_m.map2AB_size();
 	__pos += __size;
+	// spin-orbit
+	for(int lso = 1, l = this->l_max() + lso; lso <= this->lso_max(); ++lso, ++l )
+	{
+		this->map3node_set_l( l );
+		this->map3nx2_set_l( lso );
+		__size = 0;
+		for(int na = 0; na <= la; ++na )
+		{
+			this->map3nx2_set_na( na );
+			for(int nb = 0; nb <= lb; ++nb )
+			{
+				this->map3nx2_set_nb( nb );
+				__size += this->map3nx2();
+			}
+		}
+		this->map3node_pos() = __pos;
+		this->map3node_size() = __size;
+		__pos += __size * 3;
+	}
 }
 
 // node
