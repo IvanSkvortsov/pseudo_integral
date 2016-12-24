@@ -1,0 +1,13 @@
+#ifndef __ASSERT_CONFIG_H__
+#define __ASSERT_CONFIG_H__
+
+#define __ALPHA_MAP_ASSERT 0
+#define __ALPHA_VAL_ASSERT 0
+#define __ALPHA_POW_ASSERT 0
+#define __ALPHA_SLM_ASSERT 0
+
+#define __QU_RADIAL_MAP_ASSERT 0
+#define __QU_RADIAL_MEM_ASSERT 0
+#define __QU_RADIAL_DAT_ASSERT 0
+
+#endif//__ASSERT_CONFIG_H__

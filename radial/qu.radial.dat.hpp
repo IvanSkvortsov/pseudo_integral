@@ -11,9 +11,10 @@
 #endif
 
 template<typename T, typename U> qu_radial_dat<T,U>::qu_radial_dat(): memory_map(), memorystream(), qu_radial_map(), alpha_pow<T,U>(),
-	_M_mx1qu(), _M_map3qu(){}
+	_M_mx1qu(), _M_map3qu(), __QU_RADIAL_DAT_ITER_INIT_LIST {}
 template<typename T, typename U> qu_radial_dat<T,U>::qu_radial_dat( qu_radial_dat<T,U> const & v ):
-	memory_map(), memorystream( v ), qu_radial_map( v ), alpha_pow<T,U>( v ), _M_mx1qu( v._M_mx1qu ), _M_map3qu( v._M_map3qu ){}
+	memory_map(), memorystream( v ), qu_radial_map( v ), alpha_pow<T,U>( v ), _M_mx1qu( v._M_mx1qu ), _M_map3qu( v._M_map3qu ),
+	__QU_RADIAL_DAT_COPY_ITER_INIT_LIST( v ) {}
 template<typename T, typename U> qu_radial_dat<T,U> & qu_radial_dat<T,U>::operator=( qu_radial_dat<T,U> const & v )
 {
 	if( this == &v )

@@ -31,6 +31,12 @@
   #include<iomanip>
 #endif
 
+#define __QU_RADIAL_DAT_ITER_INIT_LIST \
+  _map3qu_it_la(), _map3qu_it_lb(), _qu_dat_it_ia(), _qu_dat_it_ib(), _map3qu_it_l(), _qu_dat_it_ic(), _qu_dat_it_id()
+#define __QU_RADIAL_DAT_ITER_COPY_INIT_LIST( v )\
+  _map3qu_it_la( v._map3qu_it_la ), _map3qu_it_lb( v._map3qu_it_lb ), _qu_dat_it_ia( v._qu_dat_it_ia ), _qu_dat_it_ib( v._qu_dat_it_ib ),\
+  _map3qu_it_l ( v._map3qu_it_l ),  _qu_dat_it_ic( v._qu_dat_it_ic ), _qu_dat_it_id( v._qu_dat_it_id )
+
 template<typename T, typename U>
 struct qu_radial_dat : public memory_map, public memorystream, public qu_radial_map, public alpha_pow<T,U>
 {

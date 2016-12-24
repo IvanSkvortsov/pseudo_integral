@@ -515,6 +515,27 @@ template<> mpfr::mpreal const & fact_n_data<mpfr::mpreal>(int n)
 		v = math::fact_n<u64_t>(n);
 	return v;
 }
+/*
+template<> mpfr::mpreal const & fact_n_data<mpfr::mpreal>(int n)
+{ // very slow algorithm
+	static mpfr::mpreal v = mpfr::mpreal(1), N;
+	if( n > FACT_N_UINT64T_NMAX )
+	{
+		N = n;
+		for( long int c = n - 1; c > FACT_N_UINT64T_NMAX; --c )
+		{
+			v = 0;
+			for( long int b = c; b > 0; b >>= 1, N <<= 1 )
+				if( b & 1 ) v += N;
+			N = v;
+		}
+		v *= math::fact_n<u64_t>(FACT_N_UINT64T_NMAX);
+	}
+	else
+		v = math::fact_n<u64_t>(n);
+	return v;
+}
+*/
 template mpfr::mpreal const & math::fact_n(int n);
 #endif
 

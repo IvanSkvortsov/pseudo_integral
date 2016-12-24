@@ -19,6 +19,16 @@
   #define __assert__( arg )
 #endif
 
+#define __QU_RADILA_MAP_ITER_INIT_LIST \
+	_map3qu_pos_it_n(), _map3qu_pos_it_m(), _map3qu_pos_it_p(), _map3qu_pos_it_la(), _map3qu_pos_it_lb(),\
+	_map1qu_dat_it_n(), _map1qu_dat_it_m(), _map1qu_dat_it_p(), _map1qu_dat_it_N(), _map1qu_dat_it_lmb_a(), _sz3_it()
+
+#define __QU_RADILA_MAP_COPY_ITER_INIT_LIST( v ) \
+	_map3qu_pos_it_n( v._map3qu_pos_it_n ), _map3qu_pos_it_m( v._map3qu_pos_it_m ), _map3qu_pos_it_p( v._map3qu_pos_it_p ),\
+	_map3qu_pos_it_la( v._map3qu_pos_it_la ), _map3qu_pos_it_lb( v._map3qu_pos_it_lb ),\
+	_map1qu_dat_it_n( v._map1qu_dat_it_n ), _map1qu_dat_it_m( v._map1qu_dat_it_m ), _map1qu_dat_it_p( v._map1qu_dat_it_p ),\
+	_map1qu_dat_it_N( v._map1qu_dat_it_N ), _map1qu_dat_it_lmb_a( v._map1qu_dat_it_lmb_a ), _sz3_it( v._sz3_it )
+
 struct qu_radial_map: public mapping_struct
 {
 public:

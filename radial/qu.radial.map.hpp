@@ -5,15 +5,11 @@
 #include<cstdlib>// exit
 
 qu_radial_map::qu_radial_map(): mapping_struct(), _map1qu_dat_size(), _M_lmax(), _M_map3qu_pos(), _M_map1qu_dat(),
-	_map3qu_pos_it_n(), _map3qu_pos_it_m(), _map3qu_pos_it_p(), _map3qu_pos_it_la(), _map3qu_pos_it_lb(),
-	_map1qu_dat_it_n(), _map1qu_dat_it_m(), _map1qu_dat_it_p(), _map1qu_dat_it_N(), _map1qu_dat_it_lmb_a(),
-	_sz3_it(){}
+	__QU_RADIAL_MAP_ITER_INIT_LIST {}
 
 qu_radial_map::qu_radial_map( qu_radial_map const & v): mapping_struct( v ), _map1qu_dat_size( v._map1qu_dat_size ),
 	_M_lmax(v._M_lmax), _M_map3qu_pos( v._M_map3qu_pos ), _M_map1qu_dat( v._M_map1qu_dat ),
-	_map3qu_pos_it_n(), _map3qu_pos_it_m(), _map3qu_pos_it_p(), _map3qu_pos_it_la(), _map3qu_pos_it_lb(),
-	_map1qu_dat_it_n(), _map1qu_dat_it_m(), _map1qu_dat_it_p(), _map1qu_dat_it_N(), _map1qu_dat_it_lmb_a(),
-	_sz3_it(){}
+	__QU_RADIAL_MAP_COPY_ITER_INIT_LIST( v ) {}
 
 qu_radial_map & qu_radial_map::operator=( qu_radial_map const & v)
 {
