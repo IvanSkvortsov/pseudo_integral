@@ -563,6 +563,7 @@ void ixs_angular_dat<T,U>::comp_ang_max_SemiLocal( _lxyz_struct const & _lxyz, g
 	static U angular_value[4] = {U(0), U(0), U(0), U(0)};
 	__ixs_ang_assert__( this->mx1ang_sc_size() == this->mx1ang_so_size() );
 	T * __p_mx1ang_sc_beg = this->mx1ang_sc_data(), * __p_mx1ang_so_beg = this->mx1ang_so_data();
+	qu_radial_dat<T,U> qu_rad_so( qu_rad );
 	//T * __p_mx1ang_beg = __p_mx1ang;
 
 	ixs_omega<T,U> ixs_omg_a( ixs_omg ), ixs_omg_b( ixs_omg );

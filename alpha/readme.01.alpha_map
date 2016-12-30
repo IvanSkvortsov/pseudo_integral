@@ -1,0 +1,191 @@
+class alpha_map:
+[0]- Table of content:
+1 - What for?
+2 - Fields
+ 2.1 - alphas
+ 2.2 - coefficients
+ 2.3 - normas
+ 2.4 - k powers
+ 2.5 - spherical harmonics
+3 - Methods
+ 3.1 - Matrix
+ 3.2 - Allocation
+ 3.3 - Initialization of matrices' elements
+ 3.4 - Iteratrion
+  3.4.1 - 1d-matrix iteration
+  3.4.2 - 2d-matrix iteration
+  3.4.3 - 3d-matrix iteration
+4 - Instruction
+...
+[1]- What for? -> to store sizes, and positions ( struct {int _pos, _size;} ) of:
+  a) basis set and pseudo potential;
+  b) powers of |kx| = 2 * alp_x * CX (x = a, b; X = A, B), |k| = |ka+kb|;
+  c) spherical harmonics S_{l,m}( k/|k| ), where k = ka + kb (3d-vector);
+[2]- Fields:
+  mapnX - nd-matrices (e.i. %_M_map1A - 1d-matrix)
+> a) --- alphas:
+  matrix elements are struct {int _pos, _size; }
+    when fixed angular momentum lx (lx = la, lb, l) it's named a shell
+    %_size - number of alphas in a shell
+    %_pos  - position of 0'th alpha in a shell
+  .%_M_map1A - 1d-matrix that is storage of number and position of 0'th alpha of basis set A in a shell with angular momentum la (la=0..la_max);
+  .%_M_map1B - -//- basis set B, lb=0..lb_max;
+  .%_M_map1C - -//- pseudo potential, l=0..l_max - scalar part, l=(l_max+1)..(l_max+lso_max) - spin-orbit part;
+  .%_M_map2AB - 2d-matrix, product of A and B matrices,
+  .%_M_map3ABC - 3d-matrix, product of A, B, and C matrices;
+    %map2AB_size(la, lb) /* wrap to %_size */ = %map1A_size( la ) * %map1B_size( lb );
+    %map3ABC_size(la, lb, l) /* wrap to %_size */ = %map1A_size( la ) * %map1B_size( lb ) * %map1C_size( l );
+    %map2AB_pos(la, lb) and %map3ABC_pos(la, lb, l) - wrap to %_pos values - are calculated according to 'new' %_size values;
+      %_M_map1A->size() = (la_max + 1);
+      %_M_map1B->size() = (lb_max + 1);
+      %_M_map1C->size() = (l_max + 1 + lso_max);
+      %_M_map2AB->size() = (la_max + 1) * (lb_max + 1);
+      %_M_map3ABC->size() = (la_max + 1) * (lb_max + 1) * (l_max + 1 + lso_max);
+> a) --- coefficients:
+  matrix elements are struct {int _pos, _size; }// only %_size variable is used;
+    %_size - number of basis functions in a shell
+  .%_M_map1A_d - number of basis functions of basis set A in a shell with ang. mom. la;
+  .%_M_map1B_d - -//- basis set B, lb
+  .%_M_map1C_d - -//- pseudo potential, l;
+  .%_M_map3ABC_d - product of A, B, and C matrices;
+      %_M_map1A_d->size() = (la_max + 1);
+      %_M_map1B_d->size() = (lb_max + 1);
+      %_M_map1C_d->size() = (l_max + 1 + lso_max);
+      %_M_map3ABC_d->size() = (la_max + 1) * (lb_max + 1) * (l_max + 1 + lso_max);
+  P.S. basis function:  bf = Sum_{n=0}{nmax} d_n bp_n, where bp_n - n'th primitive, d_n - n'th coefficient in basis function expansion;
+       basis primitive: bp = exp( -alp_x * rX^2 ), where rX = r - X, X - center of primitive
+  a) --- normas:
+  matrix elements are integer variables
+    %_pos - position of 0'th norm. coef. in a shell with ang.mom. lx and powers nx,ny,nz
+  .%_M_map1A_norm - positions of 0'th normalization coefficient of basis set A in a shell with ang.mom. la, and x,y,z components' powers ax,ay,az;
+  .%_M_map1B_norm - -//- basis set B; lb; bx,by,bz;
+  .%_M_map2AB_norm - product of A and B matrices;
+      %_M_map1A_norm->size() = (la_max + 1) * (la_max + 2) * (la_max + 3) / 6;
+      %_M_map1B_norm->size() = (lb_max + 1) * (lb_max + 2) * (lb_max + 3) / 6;
+      P.S. Sum_{n=0}^{n_max} Sum_{i=0}^{n} i = (n_max + 1) * (n_max + 2) * (n_max + 3) / 6;
+> b) --- k powers:
+  matrix elements are struct {int _pos, _size; }
+    %_size = max_pow + 1;// (%_size - 1) - maximum power of |kx| in a shell
+    %_pos  - position of 0'th power in a shell 
+    kA = 2 * alp_a * |CA|;
+    kB = 2 * alp_b * |CB|;
+    k = 2 * |(alp_a * CA + alp_b * CB)|;
+  .%_M_map1powkA - max power and positions of 0'th powers of kA in a shell with ang.mom. la;
+  .%_M_map1powkB - -//- kB in a shell with ang.mom. lb;
+  .%_M_map2powk  - -//- |k| in a shell with ang.mom. la, lb;
+      %_M_map1powkA->size() = (la_max + 1);
+      %_M_map1powkB->size() = (lb_max + 1);
+      %_M_map2powk->size()  = (la_max + 1) * (lb_max + 1);
+> c) --- spherical harmonics:
+  matrix elements are struct {int _pos, _size; }
+    %_size = Sum_{lx=0}^{la+lb} (2*lx + 1), fixed la, lb;
+    %_pos  = Sum_{i,j=0}^{la,lb} %_size(i, j) * %alpha_map::map2AB_size(i, j);
+    P.S. %alpha_map::map2AB_size(i, j) = %alpha_map::map1A_size( i ) * %alpha_map::map1B_size( j ), where
+      %map1A_size( i ) - number of alphas of basis set A in a shell with ang.mom. i
+      %map1B_size( j ) - number of alphas of basis set B in a shell with ang.mom. j
+  .%_M_map2slm - sizes and positions of 0'th spher.harm. in a shell with la, lb;
+      %_M_map2slm->size() = (la_max + 1) * (lb_max + 1);
+[3]- Methods:
+  (records like 'map1##X...' have X = A, B, C, A_d, B_d, C_d, powkA, powkB, A_norm, B_norm)
+  (records like 'map2##X...' have X = AB, AB_norm, powk, slm)
+  (records like 'map3##X...' have X = ABC, ABC_d)
+> Matrix:
+  1d-matrix
+  . %M_map1##X##_size() = %_M_map1##X->size();
+  . %M_map1##X##_data() = %_M_map1##X->data();
+  2d-matrix
+  . %M_map2##X##_size() = %_M_map2##X->size();
+  . %M_map2##X##_n() = %_M_map2##X->n();
+  . %M_map2##X##_m() = %_M_map2##X->m();
+  . %M_map2##X##_data() = %_M_map2##X->data();
+  3d-matrix
+  . %M_map3##X##_size() = %_M_map3##X->size();
+  . %M_map3##X##_n() = %_M_map3##X->n();
+  . %M_map3##X##_m() = %_M_map3##X->m();
+  . %M_map3##X##_p() = %_M_map3##X->p();
+  . %M_map3##X##_data() = %_M_map3##X->data();
+> Allocation
+  . %comp_size( _lmax_struct const & )const - compute needed size of memory (in bytes) to allocate all 1d-, 2d-, 3d-matrices;
+    P.S. %M_map1##X##_size(), %M_map2##X##_size(), and %M_map3##X##_size() are recalculated;
+  . %comp_size_##mapnX( _lmax_struct const & )const - methods of separate calculation of matrix's sizes;
+    mapnX = map1X - all 1d-matrices except map1powkA, and map1powkB;
+    mapnX = map2X - all 2d-matrices except map2powk, and map2slm;
+    mapnX = map3X - all 3d-matrices;
+    mapnX = map1powkA;
+    mapnX = map1powkB;
+    mapnX = map2powk - 2d-matrices map2powk, and map2slm;
+  . %write_map( memorystream & , _lmax_struct const & ) - inition of pointers %_M_#mapnX, and others; (needed further "Initialization ..." paragraph);
+  . %write_##mapnX( memorystream & )
+  . %read_map( memorystream & ) - initialization of pointers (not needed further "Initialization of matrices' elements")
+  . %read_##mapnX( memorystream & )
+     map1X - all 1d-matrices except map1powkA, and map1powkB;
+     map2X - all 2d-matrices except map2powk, and map2slm;
+     map3X - all 3d-matrices;
+     map1powkA - 1d-matrix map1powkA;
+     map1powkB - 1d-matrix map1powkB;
+     map2powk - 2d-matrix map2powk;
+     map2slm - 2d-matrix map2slm;
+> Initialization of matrices' elements:
+  . 0. %init_map1X( const int * A_size, const int * B_size, const int * C_size ) - initialize elements of %_M_map1A, %_M_map1B, and %_M_map1C;
+  . 1. %init_map2X() - initialize elements of %_M_map2AB;
+  . 2. %init_map3X() - initialize elements of %_M_map3ABC;
+  . 4. %init_map1powk##X() - initialize elements of %_M_map1powkA, and %_M_map1powkB;
+  . 5. %init_map2powk() - initialize elements of %_M_map2powk;
+  . 6. %init_map2slm() - initialize elements of %_M_map2slm;
+  .  %init_map( const int * A_size, const int * B_size, const int * C_size ) - run methods 0-6 %init_##mapnX;
+  . 0. %init_map1X_d(const int * A_dsize, const int * B_dsize, const int * C_dsize) - initialize elements of %_M_map1A_d, %_M_map1B_d, and %_M_map1C_d;
+  . 1. %init_map3X_d() - initialize elements of %_M_map3ABC_d;
+  .  %init_mapd( const int * A_dsize, const int * B_dsize, const int C_dsize ) - run methods 0-1 %init_##mapnX##_d;
+  . 0. %init_map1X_norm() - initialize elements of %_M_map1A_norm, and %_M_map1B_norm;
+  . 1. %init_map2AB_norm() - initialize elements of %_M_map2AB_norm;
+  .  %init_map_norm() - run methods 0-1 %init_##mapnX##_norm();
+> Iteration:
+* 1d-matrix iteration:
+  a. serial access:
+  . 1. %map1##X##_set_lx( lx ) - set iterator to position pointing to a shell with ang.mom. lx;
+  . %map1##X##_size() - get number of elements in a shell lx,    wrap to %_size element of struct {int _pos, _size; };
+  . %map1##X##_pos()  - get position of 0'th element in a shell, wrap to %_pos  element of struct {int _pos, _size; };
+  . %map1##X##_idx( ix ) = %map1##X##_pos() + ix; semi-random access to index of ix'th element of a shell with ang.mom. lx;
+  . 2. %map1##X##_set_ix( ix ) - set 'iterator2' to position pointing to a ix'th element of a shell with ang.mom. lx;
+  . %map1##X##_idx() = %map1##X##_pos() + ix;
+  b. random access:
+  . %map1##X##_size( lx );
+  . %map1##X##_pos( lx );
+  . %map1##X##_idx( lx, ix );
+* 2d-matrix iteration:
+  a. serial access:
+  . 1. %map2##X##_set_la( la );
+  . 2. %map2##X##_set_lb( lb ) - set iterator pointing to a shell (la, lb);
+  . %map2##X##_size() - get number of elements in a shell (la, lb);
+  . %map2##X##_pos()  - get position of 0'th element in a shell (la, lb);
+  . %map2##X##_idx( ia, ib ) = %map2##X##_pos() + (ia * %map1##Xb##_size() + ib); get index of (ia, ib)'th element of a shell (la, lb);
+    P.S. such semi-random access needs to be set %map1##Xb##_set_lx( lb );
+  . 3. %map2##X##_set_ia( ia );
+  . 4. %map2##X##_set_ib( ib ) - set iterator pointing to (ia, ib)'th element of a shell (la, lb);
+  . %map2##X##_idx() - get index of (ia, ib)'th element of shell (la, lb);
+  b. random access:
+  . %map2##X##_size( la, lb );
+  . %map2##X##_pos( la, lb );
+  . %map2##X##_idx( la, i, lb, j );
+* 3d-matrix iteration:
+  a. serial access:
+  . 1. %map3##X##_set_la( la );
+  . 2. %map3##X##_set_lb( lb );
+  . 3. %map3##X##_set_l( l ) - set iterator pointing to a shell (la, lb, l);
+  . %map3##X##_size() - get number of elements in a shell (la, lb, l);
+  . %map3##X##_pos()  - get position of 0'th element in a shell (la, lb, l);
+  . %map3##X##_idx(ia, ib, ic) = %map3##X##_pos() + (ia * %map1##Xb##_size() + ib) * %map1##Xc##_size();
+    get index of (ia, ib, ic)'th element of a shell (la, lb, l);
+    P.S. such semi-random access needs to be set %map1##Xb##_set_lx( lb ), and %map1##Xc##_set_lx( l );
+  . 4. %map2##X##_set_ia( ia );
+  . 5. %map2##X##_set_ib( ib );
+  . 6. %map2##X##_set_ic( ic ) - set iterator pointing to (ia, ib, ic)'th element of a shell (la, lb, l);
+  . %map2##X##_idx() - get index of (ia, ib, ic)'th element of shell (la, lb, l)
+  b. random access:
+  . %map2##X##_size( la, lb, l );
+  . %map2##X##_pos( la, lb, l );
+  . no random access to index, %map2##X##_idx( la, ia, lb, ib, l, ic );
+[4] - Instruction:
+  . 1. set mapping type, method %set_mapping_##x(), (x = max, mid, min - (A!=C!=B), (A!=C==B), (A==C==B), respectively);
+  . 2. initialize pointers, method %write_map( memorystream & , _lmax_struct const & );
+  . 3. initialize matrices' elements, methods %init_##mapnX;

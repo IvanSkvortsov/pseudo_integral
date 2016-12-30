@@ -1,0 +1,30 @@
+[0] - Table of content:
+1 - Fields
+2 - Methods
+ 2.1 - Initialization of matrix's ( std::vector's ) elements
+ 2.2 - Iteration
+3 - Intstruction
+
+class alpha_slm:
+[1] - Fields:
+  . inherited from alpha_pow;
+  . inherited from std::vector;
+[2] - Methods:
+> Initialization of matrix's (std::vector's) elements:
+  . %init_mxslm( T const * CA, T const * A_alp, T const * CB, T const * B_alp, matrix_slm const & mx_slm );
+    initialization matrices:
+      1. run %init_mx1powkA( ... );// %alpha_pow::_M_mx1powkA;
+      2. run %init_mx1powkB( ... );// %alpha_pow::_M_mx1powkB;
+      3. run %init_mx2slm( ... );// +initialize %alpha_val::_M_mx2k, %alpha_pow::_M_mx2powk;
+      4. run %init_mx1kB3( ... );// %alpha_val::_M_mx1kB3;
+  . %init_mx2slm( T const * CA, T const * A_alp, T const * CB, T const * B_alp, matrix_slm const & mx_slm );
+    additionally initialize %alpha_val::_M_mx2k, %alpha_pow::_M_mx2powk;
+> Iteration:
+  a. serial access:
+  . %mx2slm() = std::vector::data() + %alpha_map::map2slm_idx(); - get address of 0'th spherical harmonic of %map2slm_idx()'th element of ~%_M_mx2slm;
+  . %mx2slm_set_lmb( int _lmb_ ) - set iterator pointing to spherical harmonic with ang.mom. %_lmb_;
+  . %mx2slm( int m ) - get spher.harm. ( %_lmb_, %m ) - with ang.mom. %_lmb_, and projection to Oz axis %m;
+  b. random access (semi-random):
+  . %mx2slm( int _lmb_, int m );
+[3] - Instruction:
+...

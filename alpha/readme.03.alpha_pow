@@ -1,0 +1,39 @@
+
+class alpha_pow:
+[1] - Fields:
+  . inherited from alpha_val;
+  . %_M_mx1powkA - powers of kA, kA = 2 * alp_a * |CA|;
+  . %_M_mx1powkB - powers of kB, kB = 2 * alp_b * |CB|;
+  . %_M_mx2powk - powers of k, k = 2 * |(alp_a * CA + alp_b * CB)|;
+[2] - Methods:
+> Matrix:
+  . %M_##mxnpowkX##_size();
+  . %M_##mxnpowkX##_data();
+  ...
+> Allocation:
+  . %comp_size( _lmax_struct const & __lmax, _alpsize_struct const & __alpsize, const int * __A_size, const int * __B_size );
+  P.S. this method includes %alpha_val::comp_size method, so that resulting memory size value is the sum of %alpha_val::comp_size(...)
+    and memory size needed for allocation mxnpowkX matrices;
+  . %write_mxpow( memorystream & ms, ... );
+  . %read_mxpow( memorystream & ms );
+> Initialization of matrices' elements:
+  . %init_mxpow( T const * CA, T const * A_alp, T const * CB, T const * B_alp );
+> Iteration:
+  a. serial access:
+    powkX = powkA, powkB:
+  . %mx1##powkX##_set_idx( int _idx_ ) - set iterator pointing to _idx_'th element of %_M_mx1##powkX; %iter = %M_mx1##powkX( _idx_ );
+  . %mx1##powkX##_set_idx(); %iter = %M_mx1##powkX( %alpha_map::map1##powkX##_idx() );
+  . %mx1##powkX( int n ) - get n'th power of _idx_'th element of %_M_mx1##powkX;
+    P.S. n = 0..(alpha_map::map1##powkX##_size()-1);
+    mx2powk methods:
+  no method mx2powk_set_idx( int _idx_ );
+  . %mx2powk_set_idx(); %iter = %M_mx2powk( alpha_map::map2powk_idx() );
+  . %mx2powk( int n ) - get n'th power of k;
+  b. random access:
+  . %mx1##powkX( int lx, int _idx_ ) - get pointer to 0'th power of kX; usage is: %mx1##powkX( lx, _idx_ )[n] - n'th power of kX;
+  . %mx1##powkX( int lx, int _idx_, int n ) - get n'th power of kX;
+  . %mx2powk( int la, int i, int lb, int j ) - get pointer to 0'th power of k;
+  . %mx2powk( int la, int i, int lb, int j, int n ) - get n'th power of k;
+  P.S. there is no semi-random access;
+[3] - Instruction:
+...

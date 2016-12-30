@@ -1,0 +1,95 @@
+**************  MEMORY ALLOCATION  **************
+
+methods of class qu_radial_map:
+1.  %comp_size( _lmax_struct const & )const - returns value of memory needed to allocate (in bytes), computes sizes of all needed matrices
+2.a %write_map( memorystream & , _lmax_struct const & ) - initializes class fields (pointers), writes into memory (memorystream)
+2.b %read_map( memorystream & ) - initializes class fields (pointers), reads from memory (memorystream)
+3.  %init_map() - initializes matrices (sizes, elements)
+P.S. typedef struct {int _la_max, _lb_max, _l_max, _lso_max; } _lmax_struct;
+  memorystream - some class of smart pointers series for control read/write operations
+
+methods of class qu_radial_mem:
+1.a %memory_create( const char * , int , mode_type ):
+  1) creation of mapped memory  - %memory_map::create( ... ),
+  2) initialization of pointers - %qu_radial_map::write_map( ... )
+1.b %memory_open  ( const char * , int , mode_type ):
+  1) opening of mapped memory  - %memory_map::open( ... ),
+  2) initialization of pointers - %qu_radial_map::read_map( ... )
+P.S. All classes derived from class memory_map have these two methods (%memory_create, %memory_open) coupled with %write_##x, %read_##x methods
+
+methods of class qu_radial_dat:
+1.  %comp_size() - memory size (in bytes)
+2.a %memory_create( const char * , int , mode_type ) - 1) creation of mapped memory (%memory_map::create), 2) initialization of pointers (%write_dat)
+2.b %memory_open  ( const char * , int , mode_type ) - 1) opening  of mapped memory (%memory_map::open)  , 2) initialization of pointers (%read_dat)
+3.  %init_dat() - initialization of matrices (sizes, elements)
+
+******************  ITERATION  ******************
+
+methods of class qu_radial_map:
+1. %map3qu_pos_set_##lx( int )// lx = la, lb, l
+  usage:
+  1) ..._set_la( num )// 'num' - angular momentum of basis function A
+  2) ..._set_lb( num )// 'num' - angular momentum of basis function B
+  3) ..._set_l( num )// here 'num'=0..l_max - are for scalar part; 'num'=(l_max+1)..(l_max+lso_max) - are for spin-orbit (here 'so') part
+  methods that are available after %map3qu_pos_set_l( int ):
+    . %map1qu_pos()  - position of 0'th element of 3d-matrix ( Q^N_{lmb_a, lmb_b}; dimensions - N, lmb_a, lmb_b )
+    . %map1qu_##x()  - x = n, m, p, size; parameters of 3d-matrix ( 3 sizes: 'n', 'm', 'p', and total 'size' = 'n * m * p' )
+    . %qu_size()     - number of elements of 3d-matrix Q(N, lmb_a, lmb_b) that (elements) will be used - not all elements of 3d-matrix are used
+    . %map1qu_data() = %_M_map1qu_dat->data() + %map1qu_pos(); %_M_map1qu_dat->data() - address of 0'th element of 1d-matrix
+2. %map1qu_dat_set_##lmb( int ) /* lmb = N, lmb_a, lmb_b */ - getting access to elements of 3d-matrix Q(N, lmb_a, lmb_b)
+  usage:
+  1) ..._set_N( num )// 'num' - value of N
+  2) ..._set_lmb_a( num )// 'num' - value of lmb_a
+  2) ..._set_lmb_b( num )// 'num' - value of lmb_b
+  methods that are available after %map1qu_dat_set_lmb_b( int ):
+    . %qu_idx() - serial number of 3d-Q(N,lmb_a,lmb_b)-matrix's element which will be used
+      P.S. %qu_idx() = 0..%qu_size()-1 -- usable element; if %qu_idx() < 0 -- not usable element
+    . %qu_idx_is_good() -- 'true' if %qu_idx() > -1; otherwise 'false'
+    . %qu_n()        - integer value
+    . %qu_is_on()    - 'true' if %qu_n() has 1st bit set 1
+    . %qu_is_done()  - 'true' if %qu_n() has 2nd bit set 1
+    . %qu_on()       - set 1st bit of %qu_n() to 1
+    . %qu_set_done() - set 2nd bit of %qu_n() to 1
+    . %qu_off()      - set %qu_n() value to 0
+    . %qu_reset_done()     - set 2nd bit of %qu_n() to 0
+    . %qu_reset_done_all() - apply %qu_reset_done() for all %qu_size() amount of elements of 3d-Q(N,lmb_a,lmb_b)-matrix
+P.S. The purposes of this class are:
+  a) to store sizes of 3d-Q(N,lmb_a,lmb_b)-matrices -- e.i. for semi-local part of scalar ECP: N=0..(la+lb), lmb_a=0..(la+l), lmb_b=0..(lb+l);
+  b) to provide interface to control computation of radial integral
+
+methods of class qu_radial_dat:
+1. %map3qu_set_##lx( int )// lx = la, lb, l
+  usage:
+  1) ..._set_la( num )// 'num' - angular momentum of basis function A
+  2) ..._set_lb( num )// 'num' - angular momentum of basis function B
+  3) ..._set_l( num )// here 'num'=0..l_max - are for scalar part; 'num'=(l_max+1)..(l_max+lso_max) - are for spin-orbit (here 'so') part
+  methods that are available after %map3qu_set_l( int ):
+    . %qu_dat_pos() - position of 0'th element of 1st 3d-Q(N,lmb_a,lmb_b)-matrix
+        the amount of 3d-matrices for fixed (la,lb,l) triple := %alpha_map::map1A_size() * %alpha_map::map1B_size() * %alpha_map::map1C_size(), where
+        %alpha_map::map1A_size() - amount of alphas (exponent powers of Gaussian functions) for basis set A with angular momentum 'la'
+        %alpha_map::map1B_size() - --//-- for basis set B, and angular momnetum 'lb'
+        %alpha_map::map1C_size() - --//-- for pseudo potential, and angular momnetum 'l', P.S. 'l' > l_max - are denoted to spin-orbit part
+    . %qu_dat_##x() - x = 'n', 'm', 'p', 'q', 'size'
+        ..._n() = %alpha_map::map1A_size()
+        ..._m() = %alpha_map::map1B_size()
+        ..._p() = %alpha_map::map1C_size()
+        ..._q() = %qu_radial_map::qu_size()
+        .._size() = %qu_radial_map::qu_size() * %alpha_map::map3ABC_size()
+        %alpha_map::map3ABC_size() = %alpha_map::map1A_size() * %alpha_map::map1B_size() * %alpha_map::map1C_size()
+2. %qu_dat_set_##ix( int )// ix = ia, ib, ic, id
+  usage:
+  1) ..._set_ia( num )// 'num' - index of alpha of basis set A ( with ang.mom. la )
+  2) ..._set_ib( num )// 'num' - --//-- of basis set B ( with ang.mom. lb )
+  3) ..._set_ic( num )// 'num' - --//-- of pseudo potential ( with ang.mom. l )
+  method that is available after %qu_dat_set_ic( int ):
+    . %qu_dat_value( int ) - one should use %qu_radial_map::qu_idx() to get value of radial integral
+  4) ..._set_id( num )// 'num' - index of 3d-Q(N,lmb_a,lmb_b)-matrix's element ( one of %qu_radial_map::qu_idx() )
+  method that is available after %qu_dat_set_id( int ):
+    . %qu_dat_value() - value of radial integral
+
+*****************  COMPUTATION  *****************
+
+in class qu_radial_dat:
+1. %comp_qu()
+  1.a %comp_qu_max() - in case of centers A != C != B
+  1.b %comp_qu_mid() - in case of centers A != C == B

@@ -1,0 +1,77 @@
+class qu_hyperg_1F1_struct:
+It is used in computation of radial integral by formula:
+  Q(N, lmb, alp, k) = pow(k, lmb) * sqrt(Pi) / pow(2, lmb+2) / pow( alp, (N+lmb+1)/2 ) * Gamma( a ) / Gamma( b ) * 1F1( a, b, x )
+    . Q - radial integral
+      Q(N, lmb, alp, k) = Int_{0}^{\infty} r^N * exp(-alp*r^2) * i_{lmb}^{(1)}(k*r) dr,
+        i_{lmb}^{(1)}(x) = x^{lmb} * [1/x * d/dx]^{lmb} sinh(x)/x; - modified spherical Bessel function of the 1st kind
+    . N, lmb - positive integer numbers
+    . alp = alp_a + alp_b + alp_c - sum of Gaussian exponent powers of basis function A, B, and pseudo potential C, respectively
+    . k = 2 * |alp_a * CA + alp_b * CB|, where CA = C - A, CB = C - B, and A is a center of basis set A, B - center of basis set B, C - center of ECP;
+      in this context k is scalar, so in other context it may be 3d-vector k = -2 * (alp_a * CA + alp_b * CB)
+    . a = (N + lmb + 1)/2;
+    . b = lmb + 3/2;
+    . x = pow(k, 2) / (4 * alp);
+    . Gamma - gamma function
+    . 1F1 - confluent hypergeometric function,
+      1F1( a, b, x ) = Sum_{n=0}^{\infty} (a)_n/(b)_n * x^n/n!,
+        (a)_n = a * (a+1) * ... * (a+n-1), = 1 if n==0
+Fields:
+  %a = a;// (N + lmb + 1)/2;
+  %b = b;// lmb + 3/2;
+  %x = x;// pow(k, 2) / (4 * alp);
+  %value = Q(N, lmb, alp, k) * pow(2, -%ex);
+  %ex - integer variable (usually %ex = 0, but can be used to avoid 'floating point overflow' error when Q(N, lmb, alp, k) is too big);
+  %n - integer variable, iterator (in hyperg computation);
+  %n_max - %n's maximum value reached in hyperg computation;
+  %hyperg_n - integer variable, is used to handle errors in hypergeometric computation methods (%sf_hyperg_1F1_##x);
+  %hyperg_t - integer variable, serial number of hypergeometric computation method (%sf_hyperg_1F1_##x);
+  %exp_x = exp( x ) * pown(2, -%exp_ex), variable hidden by macros;
+  %exp_ex - integer variable ( if x > log( SOME_FLOAT_MAX ); then %exp_ex isn't zero; otherwise %exp_ex = 0 );
+  %sqr_k = pow(k, 2) / 4;
+  %a_2 = N + lmb + 1;
+  %lmb = lmb;
+  %coef_g = sqrt(Pi) * Gamma( a ) / Gamma( b );
+  %coef = pow(k, lmb) / pow(2, lmb+2) / pow( alp, (N+lmb+1)/2 );
+Methods:
+  %set_k( T const & k ) - set %sqr_k;
+  %set_alp( T const & alp ) - set %x, and if defined by macros, set %exp_x
+  %set_a_2( const int a_2 ) - set %a_2
+  %set_lmb( const int lmb ) - set %b
+  %set_hyperg_t() - set %hyperg_t, the choose of hyperg. comput. method is depened on %x value
+  %set_n( const int n = 0 ) - set %n, %n = n;
+  %set_n_max( const int n_max ) - set %n_max, explicitly %n_max = n_max;
+  %set_n_max() - set %n_max, choose maximum of %n_max and current %n values, %n_max = (%n_max < %n ? %n : %n_max);
+  %set_coef_g() - compute %coef_g;
+  %set_coef( ... ) - compute %coef;
+  %comp_exp() - compute %exp_x, method hidden by macros;
+
+P.S. After debugging there found that pow(2, lmb+2) should be replaced by pow(2, lmb);
+
+class qu_hyperg_1F11_struct:
+It is used in computation of radial integral by formula:
+  Q(N, lmb1, lmb2, alp, k1, k2) = pow(k1, lmb1) * pow(k2, lmb2) * Pi / pow(2, lmb1+lmb2+3) / pow( alp, (N+lmb1+lmb2+1)/2 ) *
+   Gamma( a ) / Gamma( b1 ) / Gamma( b2 ) * 1F11( a, b1, b2, x1, x2 );
+    . Q - radial integral
+      Q(N, lmb1, lmb2, alp, k1, k2) = Int_{0}^{\infty} r^N * exp(-alp*r^2) * i_{lmb1}^{(1)}(k1*r) * i_{lmb2}^{(1)}(k2*r) dr,
+    . N, lmb1, lmb2 - positive integer number;
+    . a = (N + lmb1 + lmb2 + 1)/2;
+    . b1 = lmb1 + 3/2;
+    . b2 = lmb2 + 3/2;
+    . x1 = pow(k1, 2) / (4*alp);
+    . x2 = pow(k2, 2) / (4*alp);
+    . k1 = 2 * alp_a * |CA| - scalar value; when 3d-vector k1 = -2 * alp_a * CA;
+    . k2 = 2 * alp_b * |CB|; 3d-vector k2 = -2 * alp_b * CB;
+    . 1F11 - hypergeometric function
+      1F11(a, b1, b2, x1, x2) = Sum_{n=0}^{\infty} Sum_{m=0}^{\infty} (a)_{n+m} x1^n/(b1)_n/n! x2^m/(b2)_m/m!
+	-eq Sum_{n=0}^{\infty} (a)_n/(b1)_n x1^n/n! 1F1(a+n, b2, x2)
+Fields:
+  almost the same as for class qu_hyperg_1F1_struct taking into account differences in radial integral computation formulas
+  %_to_flip - integer variable (imitating bool var), if %x1 > %x2; then 'true'; else 'false';
+  %coef_g = Pi * Gamma( a ) / Gamma( b1 ) / Gamma( b2 );
+  %ceof = pow(k1, lmb1) * pow(k2, lmb2) / pow( alp, (N+lmb1+lmb2+1)/2 ) / pow(2, lmb1+lmb2+3);
+Methods:
+  see above =)
+  %set_flip() - if %to_flip(); then flip variables 1 (b1, x1, k1) with variables 2 (b2, x2, k2);
+    it's used to accelerate convergence of summation Sum_{n=0}^{\infty} (a)_n/(b1)_n x1^n/n! 1F1(a+n, b2, x2);
+
+P.S. After debugging there found that pow(2, lmb1+lmb2+3) should be replaced by pow(2, lmb1+lmb2+1);

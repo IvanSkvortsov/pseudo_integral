@@ -1,0 +1,11 @@
+class alpha_mem:
+[1] - Fields:
+  . inherited from class alpha_pow;
+[2] - Methods:
+> Allocation:
+  . %memory_create( ... ) - file creation (for read-write) by using memory mapping technology;
+    runs %alpha_pow::comp_size(...) to calculate needed memory size; then runs %alpha_pow::write_mxpow(...) to initialize matrices (pointers);
+  . %memory_open( ... ) - open existing file for read-only;
+    runs %alpha_pow::read_mxpow(...) to init matrices (pointers);
+> Initialization:
+  . %init_map(); - runs %alpha_map::init_map(...), %alpha_map::init_map_norm(...), and %alpha_map::init_mapd(...);

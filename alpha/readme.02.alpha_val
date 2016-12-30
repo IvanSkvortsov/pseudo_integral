@@ -1,0 +1,92 @@
+[0] - Table of content:
+1 - Fields
+2 - Methods
+ 2.1 - Matrix
+ 2.2 - Allocation
+ 2.3 - Initialization of matrices' elements
+ 2.4 - Iteration
+  2.4.1 - serial access
+  2.4.2 - random access
+3 - Instruction ...
+
+class alpha_val:
+[1] - Fields:
+  mxnX - nd-matrix;
+  . inherited from class alpha_map;
+  . %_M_mx1A - storage of alpha values of basis set A;
+  . %_M_mx1B - -//- basis set B;
+  . %_M_mx1C - -//- pseudo potential;
+  . %_M_mx1C_nk - storage of nk (powers of r) values of pseudo potential;
+  . %_M_mx1kA - storage of kA = 2 * alp_a * |CA|;
+  . %_M_mx1kB - storage of kB = 2 * alp_b * |CB|;
+      %_M_mx1A->size() - number of all alphas in basis set A;
+      %_M_mx1B->size() - -//- basis set B;
+      %_M_mx1C->size() - -//- pseudo potential;
+      %_M_mx1C_nk->size() = %_M_mx1C->size();
+  . %_M_mx1A_norm - normalization coefficients of primitives of basis set A;
+  . %_M_mx1B_norm - normalization coefficients of primitives of basis set B;
+  . %_M_mx2AB_norm - product of A, and B matrices;
+  . %_M_mx2k - storage of k = 2 * |(alp_a * CA + alp_b * CB)|;
+  . %_M_mx2AB_exp - storage of values exp( -alp_a * |CA|^2 - alp_b * |CB|^2 );
+      %_M_mx1A_norm->size() = Sum_{lx = 0}^{la_max} (lx + 1) * (lx + 2) / 2 * %alpha_map::map1A_size( lx );
+      %_M_mx1B_norm->size() = Sum_{lx = 0}^{lb_max} (lx + 1) * (lx + 2) / 2 * %alpha_map::map1B_size( lx );
+      %_M_mx2AB_norm->size() = %_M_mx1A_norm->size() * %_M_mx1B_norm->size();
+[2] - Methods:
+> Matrix:
+  . %M_##mxnX##_size() = %_M_##mxnX->size();
+  . %M_##mxnX##_data() = %_M_##mxnX->data();
+  . %M_##mxnX##_data( int i ) = %_M_##mxnX->data() + i;
+  . %M_##mxnX( int i ) - get i'th element of %_M_##mxnX;
+  . %M_##mxnX##_n() = %_M_##mxnX->n();// for 2d-matrices and higher;
+  . %M_##mxnX##_m() = %_M_##mxnX->m();// for 2d-matrices and higher;
+  . %M_##mxnX##_p() = %_M_##mxnX->p();// for 3d-matrices and higher;
+> Allocation:
+  . %comp_size( _lmax_struct const & __lmax, _alpsize_struct const & __alpsize, const int * __A_size, const int * __B_size ); - memory size in bytes;
+      struct _alpsize_struct {int _a_size, _b_size, _c_size; } - it is used to store total number of alphas in basis set A, B, and pseudo potential;
+        %_M_mx1A->size() = %_alpsize_struct::_a_size;
+        %_M_mx1B->size() = %_alpsize_struct::_b_size;
+        %_M_mx1C->size() = %_alpsize_struct::_c_size;
+      struct _lmax_struct {int _la_max, _lb_max, _l_max, _lso_max; } - used to store maximum angular momenta of basis set A, B, and pseudo potential;
+      Sum_{lx=0}^{la_max} __A_size[lx] = %_alpsize_struct::_a_size; - number of alphas in each shell of basis set A;
+      Sum_{lx=0}^{lb_max} __B_size[lx] = %_alpsize_struct::_b_size; - -//- basis set B;
+      Sum_{lx=0}^{l_max + lso_max} __C_size[lx] = %_alpsize_struct::_c_size; - -//- pseudo potential;
+  P.S. this method includes %alpha_map::comp_size( _lmax_struct const & __lmax ) method, so that resulting size is sum of memory size needed
+    for alpha_map and memory size needed for alpha_val matrices allocation;
+  . %write_mxalp( memorystream & ms, _lmax_struct const & __lmax, _alpsize_struct const & __alpsize ); - pointers initialization;
+  . %read_mxalp( memorystream & ms ); - pointers initialization;
+> Initialization of matrices' elements:
+  . 0. %init_mx1_alp( T const * A_alp, T const * B_alp, T const * C_alp ) - initialize elements of %_M_mx1A, %_M_mx1B, and %_M_mx1C matrices;
+  . 1. %init_mx1X( matrix_1d * , T const * X_alp, const int x_size, T const & CX_len ) - initialize elements of %_M_mx1k##X, X = A, B;
+  . 2. %init_mx1kB3( T const * CB, T const * B_alp ) - initialize elements of %_M_mx1kB3;
+  . 3. %init_mx2k( T const * A_alp, T const * B_alp, T const & CA_len, T const & CB_len, T const & CA_x_CB ) - initialize elements of %_M_mx2k;
+  .  %init_mxalp( T const * A_alp, T const * B_alp, T const * C_alp, T const * CA, T const * CB ) - run 0-3 methods;
+  . %init_mx1C_nk( int const * C_nk ) - initialize elements of %_M_mx1C_nk;
+  . 0. %init_mx1X_norm( T const * A_alp, T const * B_alp ) - initialize elements of %_M_mx1A_norm, and %_M_mx1B_norm;
+  . 1. %init_mx2AB_norm() - initialize elements of %_M_mx2AB_norm;
+  .  %init_norm( T const * A_alp, T const * B_alp ) - run 0-1 methods;
+  . %init_exp( T const * A_alp, T const * B_alp, T const & sqr_CA, T const & sqr_CB ) - initialize elements of %_M_mx2AB_exp;
+> Iteration:
+* a. serial access:
+  . %mxnX##_set_idx( int _idx_ ) - set iterator pointing to _idx_'th element of %_M_##mxnX; %iter = %_M_##mxnX->data() + %_idx_;
+  . %mxnX##_set_idx() = %_M_##mxnX->data() + %alpha_map::mapnX##_idx()// corresponding index (%mapnX##_idx()) needed to bet set;
+  . %mxnX() - return value of _idx_'th element of %_M_##mxnX;
+* b. random access:
+  1d-matrix:
+    X = A, B, C, C_nk, kA, kB:
+  . %mx1X( int lx, int i ) = %M_##mx1X( this->alpha_map::map1X##_idx( lx, i ) );
+  . %mx1X( int i ) = %M_##mx1X( alpha_map::map1X##_pos() + i );
+  P.S. (mx1A, mx1kA) use map1A in iteration; (mx1B, mx1kB) <-> map1B; (mx1C, mx1C_nk) <-> map1C;
+    X = A_norm, B_norm:
+  . %mx1X( int lx, int i_xyz, int i ) = %M_##mx1X( alpha_map::map1X##_idx( lx, i_xyz, i ) );// i_xyz - is index of (x,y,z)-triple: x+y+z = lx;
+  . %mx1X( int i ) = %M_##mx1X( alpha_map::map1X##_pos() + i );
+  P.S. mx1A_norm <-> map1A_norm; mx1B_norm <-> map1B_norm;
+  2d-matrix:
+    X = k, AB_exp;
+  . %mx2X( int la, int i, int lb, int j ) - get (la, lb)'th shell's (i, j)'th element of %_M_##mx2X; %M_##mx2X( alpha_map::map2AB_idx(la, i, lb, j) );
+  . %mx2X( int i, int j ) = %M_##mx2X( alpha_map::map2AB_idx( i, j ) ); - semi-random access;
+  P.S. mx2X linked with map2AB;
+    X = AB_norm; (mx2AB_norm) <-> map2AB_norm;
+  no random access, there is only semi-random:
+  . %mx2X( int i, int j );
+[3] - Intstruction:
+...
