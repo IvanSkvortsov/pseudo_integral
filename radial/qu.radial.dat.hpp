@@ -95,20 +95,19 @@ template<typename T, typename U> const typename qu_radial_dat<T,U>::size_type qu
 	size_type __size = 0;
 	for(int la = 0; la <= this->M_get_la_max(); ++la )
 	{
-		this->qu_set_la( la );
-		this->map3ABC_set_la( la );
+		this->qu_radial_map::qu_set_la( la );
+		this->alpha_map::map3ABC_set_la( la );
 		for(int lb = 0; lb <= this->M_get_lb_max(); ++lb )
 		{
-			this->qu_set_lb( lb );
-			this->map3ABC_set_lb( lb );
-			// semi-local (+) local
-			for(int l = 0; l <= this->M_get_l_max(); ++l )
+			this->qu_radial_map::qu_set_lb( lb );
+			this->alpha_map::map3ABC_set_lb( lb );
+			// semi-local (+) local (+) spin-orbit
+			for(int l = 0; l <= this->M_get_l_max() + this->M_get_lso_max(); ++l )
 			{
-				this->qu_set_l( l );
-				this->map3ABC_set_l( l );
-				__size += this->qu_size() * this->map3ABC_size();
+				this->qu_radial_map::qu_set_l( l );
+				this->alpha_map::map3ABC_set_l( l );
+				__size += this->qu_radial_map::qu_size() * this->alpha_map::map3ABC_size();
 			}
-			// TODO: spin-orbit
 		}
 	}
 	return __size;
@@ -164,8 +163,8 @@ template<typename T, typename U> void qu_radial_dat<T,U>::init_dat()
 		for(int lb = 0; lb <= this->M_get_lb_max(); ++lb )
 		{
 			this->qu_dat_set_lb( lb );
-			// semi-local (+) local
-			for(int l = 0; l <= this->M_get_l_max(); ++l )
+			// semi-local (+) local (+) spin-orbit
+			for(int l = 0; l <= this->M_get_l_max() + this->M_get_lso_max(); ++l )
 			{
 				this->qu_dat_set_l( l );
 
@@ -173,7 +172,6 @@ template<typename T, typename U> void qu_radial_dat<T,U>::init_dat()
 				this->qu_dat_size() = this->qu_size() * this->map3ABC_size();
 				__pos += this->qu_dat_size();
 			}
-			// TODO: spin-orbit
 		}
 	}
 }
@@ -227,7 +225,12 @@ template<typename T, typename U> void qu_radial_dat<T,U>::comp_qu_max()
 			this->qu_dat_set_lmax();
 			this->comp_qu_max_Local( _lx, qu_1f1, _alp, _pown05_alp, _arr_maxsize );
 			// TODO: spin-orbit
-			this->comp_qu_max_SpinOrbit();
+			for(int lso = 1; lso <= this->qu_radial_map::M_get_lso_max(); ++lso )
+			{
+				_lx.l = lso;
+				this->qu_dat_set_l( lso + this->qu_radial_map::M_get_l_max() );
+				this->comp_qu_max_SpinOrbit( _lx, qu_1f11, _alp, _pown05_alp, _arr_maxsize );
+			}
 		}
 	}
 }
@@ -660,7 +663,13 @@ template<typename T, typename U> void qu_radial_dat<T,U>::comp_qu_mid()
 			// local
 			this->qu_dat_set_lmax();
 			this->comp_qu_mid_Local( _lx, qu_1f1, _alp, _pown05_alp, _arr_maxsize );
-			// TODO: spin-orbit
+			// spin-orbit
+			for(int lso = 2 - lb%2; lso <= this->qu_radial_map::M_get_lso_max() && lso <= lb; lso += 2)
+			{
+				_lx.l = lso;
+				this->qu_dat_set_l( lso + this->qu_radial_map::M_get_lso_max() );// <- map1C_set_lx( l )
+				this->comp_qu_mid_SpinOrbit( _lx, qu_1f1, _alp, _pown05_alp, _arr_maxsize );
+			}
 		}
 	}
 }
@@ -994,6 +1003,13 @@ template<typename T, typename U> void qu_radial_dat<T,U>::test_print( std::ostre
 			for(int l = 0; l <= this->qu_radial_map::M_get_l_max(); ++l)
 			{
 				this->qu_dat_set_l( l );
+				_lx.l = l;
+				this->test_print_alp( out, _lx );
+			}
+			out << "spin-orbit:" << std::endl;
+			for(int l = 1; l <= this->qu_radial_map::M_get_lso_max(); ++l)
+			{
+				this->qu_dat_set_l( l + this->qu_radial_map::M_get_lso_max() );
 				_lx.l = l;
 				this->test_print_alp( out, _lx );
 			}

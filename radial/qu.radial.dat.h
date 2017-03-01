@@ -33,7 +33,7 @@
 
 #define __QU_RADIAL_DAT_ITER_INIT_LIST \
   _map3qu_it_la(), _map3qu_it_lb(), _qu_dat_it_ia(), _qu_dat_it_ib(), _map3qu_it_l(), _qu_dat_it_ic(), _qu_dat_it_id()
-#define __QU_RADIAL_DAT_ITER_COPY_INIT_LIST( v )\
+#define __QU_RADIAL_DAT_COPY_ITER_INIT_LIST( v )\
   _map3qu_it_la( v._map3qu_it_la ), _map3qu_it_lb( v._map3qu_it_lb ), _qu_dat_it_ia( v._qu_dat_it_ia ), _qu_dat_it_ib( v._qu_dat_it_ib ),\
   _map3qu_it_l ( v._map3qu_it_l ),  _qu_dat_it_ic( v._qu_dat_it_ic ), _qu_dat_it_id( v._qu_dat_it_id )
 
@@ -92,12 +92,19 @@ public:
 	void comp_qu_max_SemiLocal_b(_lx_struct const& _lx, qu_hyperg_1F11_struct<T> & qu_1f11, pointer _pown05_alp, const int _alp_pown05_max );
 	void comp_qu_max_Local( _lx_struct const & _lx, qu_hyperg_1F1_struct<T> & qu_1f1, T & _alp, pointer _pown05_alp, const int _arr_maxsize );
 	void comp_qu_max_Local_b(_lx_struct const& _lx, qu_hyperg_1F1_struct<T> & qu_1f1, pointer _pown05_alp, const int _alp_pown05_max );
-	void comp_qu_max_SpinOrbit(){}
+	void comp_qu_max_SpinOrbit( _lx_struct const & _lx, qu_hyperg_1F11_struct<T> & qu_1f11, T & _alp, pointer _pown05_alp, const int _arr_maxsize )
+	{
+		this->comp_qu_max_SemiLocal( _lx, qu_1f11, _alp, _pown05_alp, _arr_maxsize );
+	}
 	void comp_qu_mid();
 	void comp_qu_mid_SemiLocal( _lx_struct const & _lx, qu_hyperg_1F1_struct<T> & qu_1f1, T & _alp, pointer _pown05_alp, const int _arr_midsize );
 	void comp_qu_mid_SemiLocal_b(_lx_struct const& _lx, qu_hyperg_1F1_struct<T> & qu_1f1, pointer _pown05_alp, const int _alp_pown05_mid );
 	void comp_qu_mid_Local( _lx_struct const & _lx, qu_hyperg_1F1_struct<T> & qu_1f1, T & _alp, pointer _pown05_alp, const int _arr_midsize );
 	void comp_qu_mid_Local_b(_lx_struct const& _lx, qu_hyperg_1F1_struct<T> & qu_1f1, pointer _pown05_alp, const int _alp_pown05_mid );
+	void comp_qu_mid_SpinOrbit( _lx_struct const & _lx, qu_hyperg_1F1_struct<T> & qu_1f1, T & _alp, pointer _pown05_alp, const int _arr_midsize )
+	{
+		this->comp_qu_mid_SemiLocal( _ls, qu_1f1, _alp, _pown05_alp, _arr_maxsize );
+	}
 
 	// Usage:
 	// %qu_dat_set_la( la )

@@ -213,9 +213,9 @@ void ixs_angular_dat<T,U>::comp_ang_max( geom_slm<U> & geom_s, alpha_slm<T,U> & 
 					// index of last elements: = l_max + lso_max
 					// TODO: spin-orbit part (so_semi_local)
 					/*
-					for(int l = this->ixs_angular_map::l_max()+1, lso = 1; lso < this->ixs_angular_map::lso_max(); ++lso, ++l )
+					for(int l = this->ixs_angular_map::l_max()+1, lso = 1; lso <= this->ixs_angular_map::lso_max(); ++lso, ++l )
 					{
-						_lxyz.l = l;
+						_lxyz.l = lso;
 						this->ixs_angular_map::map3node_set_l( l );// iteration
 						__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
 						this->ixs_angular_map::map3nx2_set_l( lso );
@@ -224,21 +224,6 @@ void ixs_angular_dat<T,U>::comp_ang_max( geom_slm<U> & geom_s, alpha_slm<T,U> & 
 
 						qu_rad.qu_radial_map::qu_set_l( l );// iteration
 						this->comp_ang_max_SemiLocal_so( __p_mx1ang, _lxyz, geom_s, qu_rad, ixs_omg );
-					}
-					// spin-orbig (so_local)
-					this->ixs_angular_map::map3node_set_l( this->l_max() + this->lso_max() );// iteration
-					__p_mx1ang = __p_mx1ang_data + this->ixs_angular_map::map3node_pos();// position
-					this->ixs_angular_map::map3nx2_set_l( this->ixs_angular_map::lso_max() );
-
-					qu_rad.qu_radial_map::qu_set_l( this->l_max() + this->lso_max() );
-					for(int ia = 0; ia < alp_s.map1A_size(); ++ia)
-					{
-						alp_s.map2slm_set_ia( ia );
-						for(int ib = 0; ib < alp_s.map1B_size(); ++ib, __p_mx1ang += this->ixs_angular_map::map3node_size() )
-						{
-							alp_s.map2slm_set_ib( ib );
-							this->comp_ang_max_Local_so( __p_mx1ang, _lxyz, geom_s, alp_s, qu_rad, ixs_omg );
-						}
 					}
 					*/
 				}
