@@ -83,10 +83,10 @@ public:
 	{
 		this->_lsize._la_size = this->la_max() + 1;
 		this->_lsize._lb_size = this->lb_max() + 1;
-		this->_lsize._kA_lsize = this->la_max() + this->l_max() + 1;
-		if( this->is_mapping_mid() && this->l_max() < this->lb_max() )
-			this->_lsize._kA_lsize = this->la_max() + this->lb_max() + 1;
-		this->_lsize._kB_lsize = this->lb_max() + this->l_max() + 1;
+		const int __lmax = ( this->l_max() > this->lso_max() ? this->l_max() : this->lso_max() );
+		const int __lmax_b = ( this->lb_max() > __lmax && this->is_mapping_mid() ? this->lb_max() : __lmax );
+		this->_lsize._kA_lsize = this->la_max() + __lmax_b + 1;
+		this->_lsize._kB_lsize = this->lb_max() + __lmax + 1;
 	}
 	inline const int & la_size()const{ return this->_lsize._la_size;}
 	inline const int & lb_size()const{ return this->_lsize._lb_size;}

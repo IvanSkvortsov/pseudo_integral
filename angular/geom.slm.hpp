@@ -101,8 +101,8 @@ void geom_slm<T>::init_slmkX( T * __slm_kX, T * CX_x, T * CX_y, T * CX_z, const 
 	comp_powers_of<T>( kx.y(), lx_max, CX_y, u );
 	comp_powers_of<T>( kx.z(), lx_max, CX_z, u );
 
-	T _kx_len;
 	kx.neg();
+	T _kx_len;
 	kx.len( _kx_len );
 	kx /= _kx_len;
 
@@ -141,7 +141,7 @@ void geom_slm<T>::init_geom( T const * CA, T const * CB, matrix_slm<T> const & m
 		this->init( CA, CB, mx_slm );
 		break;
 	default:
-		this->error("init_geom", "unknowen mapping type");
+		this->error("init_geom", "unknown mapping type");
 		std::cerr << "current mapping type : " << this->get_mapping() << std::endl;
 		exit(1);
 	}
