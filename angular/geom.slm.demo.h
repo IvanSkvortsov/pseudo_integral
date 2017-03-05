@@ -37,6 +37,21 @@ T pown_f_( T const & v, int n )
 	return res;
 }
 
+template<typename T> bool if_float_eq( T const & a, T const & b, const std::size_t skip_bits = 8 )
+{
+	static T error_max, error;
+	error_max = 1;
+	error_max /= ( 1ul << skip_bits );
+	error = a;
+	error -= b;
+	if( a != 0 )
+		error /= a;
+	else if( b != 0 )
+		error /= b;
+	error = ( error < 0 ? -error: error );
+	return error < error_max;
+}
+
 template<typename T>
 void unit_test_CX( T const & gs_powCX, T const & powCX, const int i, const char * name )
 {
@@ -77,6 +92,31 @@ void gs_test_powCX( geom_slm<T> const & gs, T const * __CA, T const * __CB )
 	}
 }
 
+template<typename T>
+void gs_test_clm( geom_slm<T> & gs )
+{
+	T u;
+	bool _plus, _minus;
+	for(int l = 1; l <= gs.lso_max(); ++l )
+	{
+		gs.clm_set_l( l );
+		for(int m = -l; m <= l; ++m)
+		{
+			u  = (l - m);
+			u *= (l + m + 1);
+			u = sqrt( u );
+			_plus = if_float_eq( gs.clm_plus( m ), u );
+			_minus = if_float_eq( gs.clm_minus( m + 1), u );
+			if( !_plus || !_minus )
+			{
+				cerr << "Error: [" << __PRETTY_FUNCTION__ << "] l = " << l << ", m = " << m << endl
+					<< "clm_plus  = " << gs.clm_plus( m ) << endl
+					<< "clm_minus = " << gs.clm_minus( m + 1 ) << endl
+					<< "clm_plus_ = " << u << endl;
+			}
+		}
+	}
+}
 template<typename T>
 inline void print_3d( T const * CX, const char * name )
 {
@@ -148,6 +188,9 @@ int demo_geom_slm(char const * file )
 	print_lsize( gs );
 
 	gs.write();
+	gs.init_clm();
+	gs_test_clm( gs );
+
 	cout << setw(10) << "gs.size" << " : " << setw(6) << gs.size() << endl;
 	cout << setw(10) << "gs.data" << " : [" << setw(6) << gs.data() << "]" << endl;
 	if( gs.data() )
@@ -160,7 +203,7 @@ int demo_geom_slm(char const * file )
 
 	gs.init( CA, CB, mx_slm );
 
-	assert( gs._CA.x == gs.data() );
+	//assert( gs._CA.x == gs.data() );
 	gs_test_powCX( gs, CA, CB );
 
 	return 0;

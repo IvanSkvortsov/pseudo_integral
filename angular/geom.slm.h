@@ -21,10 +21,17 @@ inline const_reference CX##_z(int i)const{ return this->_##CX.z[i];}
 
 #define __GEOM_SLM_SLMKX_INTERFACE( slm_kX )\
 inline void slm_kX##_set_lx( int lx){ this->_##slm_kX##_it_lx = this->_##slm_kX + lx * lx + lx;}\
+inline pointer slm_kX##_get(){ return this->_##slm_kX##_it_lx;}\
+inline const_pointer slm_kX##_get()const{ return this->_##slm_kX##_it_lx;}\
 inline reference slm_kX(int m){ return this->_##slm_kX##_it_lx[m];}\
 inline const_reference slm_kX(int m)const{ return this->_##slm_kX##_it_lx[m];}\
 inline reference slm_kX(int lx, int m){ return this->_##slm_kX[ lx * lx + lx + m];}\
 inline const_reference slm_kX(int lx, int m)const{ return this->_##slm_kX[ lx * lx + lx + m];}
+
+#define __GEOM_SLM_ITER_INIT_LIST _slm_kA_it_lx(), _slm_kB_it_lx(), _clm_plus_it_lx(), _clm_minus_it_lx()
+#define __GEOM_SLM_COPY_ITER_INIT_LIST( v ) \
+	_slm_kA_it_lx(v._slm_kA_it_lx), _slm_kB_it_lx(v._slm_kB_it_lx),\
+	_clm_plus_it_lx(v._clm_plus_it_lx), _clm_minus_it_lx(v._clm_minus_it_lx)
 
 template<typename T>
 struct geom_slm : public std::vector<T>, public mapping_struct
@@ -52,13 +59,14 @@ protected:
 	_lmax_struct _lmax;
 	_3d_powers _CA, _CB;
 	pointer _slm_kA, _slm_kB;
+	pointer _clm_plus;// clm_plus[l*l+l+m] = <lm|l_+|l,m-1>; clm_minus(l,m) = <l,m|l_-|l,m-1>; clm_plus(l,m) = clm_minus(l,m+1)
 	_lsize_struct _lsize;
 
 	void init_slmkX( T * __slm_kX, T * CX_x, T * CX_y, T * CX_z, const int lx_max, const int kx_lmax, T const * CX, matrix_slm<T> const & mx_slm);
 	inline void error( const char * _method, const char _message[] = "nothing to do here" )const
 	{ std::cerr << "Error: [" << this << "] geom_slm<T>::" << _method << ", " << _message << std::endl; }
 private:
-	pointer _slm_kA_it_lx, _slm_kB_it_lx;
+	pointer _slm_kA_it_lx, _slm_kB_it_lx, _clm_plus_it_lx, _clm_minus_it_lx;
 public:
 	geom_slm();
 	geom_slm( geom_slm<T> const & v);
@@ -84,8 +92,8 @@ public:
 		this->_lsize._la_size = this->la_max() + 1;
 		this->_lsize._lb_size = this->lb_max() + 1;
 		const int __lmax = ( this->l_max() > this->lso_max() ? this->l_max() : this->lso_max() );
-		const int __lmax_b = ( this->lb_max() > __lmax && this->is_mapping_mid() ? this->lb_max() : __lmax );
-		this->_lsize._kA_lsize = this->la_max() + __lmax_b + 1;
+		const int __lmax_ka = ( this->lb_max() > __lmax && this->is_mapping_mid() ? this->lb_max() : __lmax );
+		this->_lsize._kA_lsize = this->la_max() + __lmax_ka + 1;
 		this->_lsize._kB_lsize = this->lb_max() + __lmax + 1;
 	}
 	inline const int & la_size()const{ return this->_lsize._la_size;}
@@ -102,6 +110,31 @@ public:
 	__GEOM_SLM_CX_INTERFACE( CA );
 	__GEOM_SLM_CX_INTERFACE( CB );
 
+	// clm_plus/minus usage:
+	//   1.1 %clm_set_l( l )
+	//   1.2.a %clm_plus( m )
+	//   1.2.b %clm_minus( m )
+	//   
+	//   2.1.a %clm_plus( l, m )
+	//   2.1.b %clm_minus( l, m )
+	void init_clm();
+	void clm_set_l( int __l )
+	{
+		this->_clm_plus_it_lx  = this->_clm_plus + __l * __l + __l;
+		this->_clm_minus_it_lx = this->_clm_plus_it_lx - 1;
+	}
+	reference clm_plus(  int l, int m ){ return this->_clm_plus[l*l + l + m]; }
+	reference clm_minus( int l, int m ){ return this->_clm_plus[l*l + l + m - 1]; }
+	const_reference clm_plus(  int l, int m )const{ return this->_clm_plus[l*l + l + m]; }
+	const_reference clm_minus( int l, int m )const{ return this->_clm_plus[l*l + l + m - 1]; }
+
+	reference clm_plus(  int m ){ assert( this->_clm_plus_it_lx );  return this->_clm_plus_it_lx[m]; }
+	reference clm_minus( int m ){ assert( this->_clm_minus_it_lx ); return this->_clm_minus_it_lx[m]; }
+	const_reference clm_plus(  int m )const{ assert( this->_clm_plus_it_lx );  return this->_clm_plus_it_lx[m]; }
+	const_reference clm_minus( int m )const{ assert( this->_clm_minus_it_lx ); return this->_clm_minus_it_lx[m]; }
+
+	pointer clm_get(){ return this->_clm_plus; }
+	const_pointer clm_get()const{ return this->_clm_plus; }
 	// slm_kX usage (e.i. slm_kA):
 	// in order to get spherical values of ang.mom. 'lx', and projection 'm', there are 2 ways:
 	//    1.1 %slm_kA_set_lx( lx ); -- set ang.mom. 'lx'
@@ -131,7 +164,7 @@ public:
 	// then allocate memory and init pointers
 	// 2. %write() - memory allocation and pointers initialization
 	//
-	// calculate powers and sphericals
+	// calculate powers, clm coefficients and sphericals
 	// 3. calculate powers of CA_x, CA_y, CA_z; CB_x, ...; and values of spherical harmonics for kA/|kA| = -CA/|CA|, and kB/|kB| = -CB/|CB|
 	//   1. %init( CA, CB, mx_slm ); <-- for maximum mapping
 	//   2. %init( CA, mx_slm ); <-- for middle mapping

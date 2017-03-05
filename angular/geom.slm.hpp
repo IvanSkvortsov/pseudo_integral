@@ -3,12 +3,13 @@
 #include"geom.slm.h"
 #include<cstring>// memcpy, memset
 #include"vector.3d.h"// vector_3d
+#include<cmath>
 
 template<typename T> geom_slm<T>::geom_slm(): std::vector<T>(), mapping_struct(maximum), _lmax(), _CA(), _CB(), _slm_kA(), _slm_kB()
-	,_lsize(), _slm_kA_it_lx(), _slm_kB_it_lx(){}
+	,_lsize(), _clm_plus(), __GEOM_SLM_ITER_INIT_LIST{}
 template<typename T> geom_slm<T>::geom_slm(geom_slm<T> const & v):
 	std::vector<T>(), mapping_struct(v), _lmax(v._lmax), _CA(v._CA), _CB(v._CB), _slm_kA(v._slm_kA), _slm_kB(v._slm_kB)
-	,_lsize(v._lsize), _slm_kA_it_lx(v._slm_kA_it_lx), _slm_kB_it_lx(v._slm_kB_it_lx){}
+	,_lsize(v._lsize), _clm_plus(v._clm_plus), __GEOM_SLM_COPY_ITER_INIT_LIST( v ){}
 
 template<typename T> geom_slm<T> & geom_slm<T>::operator=(geom_slm<T> const & v)
 {
@@ -27,6 +28,7 @@ template<typename T> const typename geom_slm<T>::size_type geom_slm<T>::comp_siz
 	__size += this->la_size();
 	__size += this->lb_size();
 	__size *= 3;
+	__size += (this->lso_max() + 1) * (this->lso_max() + 1);// clm_plus
 	__size += (this->kA_lsize() * this->kA_lsize());
 	__size += (this->kB_lsize() * this->kB_lsize());
 	return __size;
@@ -43,7 +45,9 @@ template<typename T> void geom_slm<T>::write()
 	this->_CB.y = this->_CB.x + this->lb_size();
 	this->_CB.z = this->_CB.y + this->lb_size();
 
-	this->_slm_kA = this->_CB.z + this->lb_size();
+	this->_clm_plus  = this->_CB.z + this->lb_size();
+
+	this->_slm_kA = this->_clm_plus + (this->lso_max() + 1) * (this->lso_max() + 1);
 	this->_slm_kB = this->_slm_kA + (this->kA_lsize() * this->kA_lsize());
 }
 
@@ -90,6 +94,30 @@ inline static void slm_pown( T * __data, matrix_slm<T> const & mx_slm, T const *
 	}
 }
 
+template<typename T>
+void geom_slm<T>::init_clm()
+{
+	using std::sqrt;
+	assert( this->lso_max() > 0 );
+
+	this->clm_set_l( 0 );
+	*this->clm_get() = 0;
+	T u;
+	for(int l = 1; l <= this->lso_max(); ++l)
+	{
+		this->clm_set_l( l );
+		for(int m = -l; m < 0; ++m)
+		{
+			u = (l - m) * (l + m + 1);
+			this->clm_plus( m ) = sqrt( u );
+		}
+		for(int m = 0; m < l; ++m)
+		{
+			this->clm_plus( m ) = this->clm_plus( -m - 1 );
+		}
+		this->clm_plus( l ) = 0;
+	}
+}
 template<typename T>
 void geom_slm<T>::init_slmkX( T * __slm_kX, T * CX_x, T * CX_y, T * CX_z, const int lx_max, const int kx_lmax,
 		T const * CX, matrix_slm<T> const & mx_slm )
